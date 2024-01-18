@@ -1,0 +1,216 @@
+element {
+  --titlegreen: #5cb85c;
+}
+
+html body{
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: url('../img/asphalt.png');
+  background-size: 160px 160px;
+  background-repeat: repeat;
+}
+
+*{
+  box-sizing: border-box;
+}
+
+#handlebar{
+  float: left;
+  font-size: 4em;
+  width: 80px;
+  height: 100%;
+  background: #428bca;
+  color: #fff;
+  cursor: pointer;
+}
+
+#handlebar i{
+  margin: 30px 0 0 10px;
+  height: 100px;
+}
+
+.title{
+  width: 100%;
+  height: 35px;
+  background: #5cb85c;
+  font-size: 1.5em;
+  color: #fff;
+  margin-bottom: 15px;
+  text-align: left;
+  float: left;
+  padding: 0 0 0 15px;
+}
+
+#createuser_wrapper{
+  width: calc(100% - 80px);
+  height: 125px;
+  text-align: center;
+  float: left;
+}
+
+#creategame_wrapper{
+  float: left;
+  width: calc(100% - 80px);
+  height: 125px;
+  text-align: center;
+  padding: 0 0 15px 0;
+}
+
+#joingame_wrapper{
+  float: left;
+  width:  calc(100% - 80px);;
+  height: 300px;
+  text-align: center;
+}
+
+#wrapper{
+  width: 602px;
+  margin: 0 auto;
+}
+
+#myCanvas{
+    background: #fff;
+}
+
+.victoryanimation{
+  animation: neonBlueText 1.5s ease-in-out infinite alternate;
+}
+
+.loseranimation{
+  animation: neonOrangeText 1.5s ease-in-out infinite alternate;
+}
+
+.neongreen_txt{
+  font-size: 14pt;
+  animation: neonGreenText 1.5s ease-in-out infinite alternate;
+}
+
+#server-time{
+  float: left;
+}
+
+#uid_info, #gname_info, #oname_info, #gamestatus, #latency, #mousecoords{
+  float: right;
+  padding: 0 10px 0 0;
+  clear: right;
+}
+
+#setup_wrapper{
+   position: absolute;
+   left: calc(100% - 80px);
+   width: 30%;
+   height: 100%;
+   overflow: hidden;
+   background-color: #222;
+   box-shadow: inset 13px -1px 61px -5px rgba(196,215,242,1);
+   background: repeating-linear-gradient(45deg, #2b2b2b 0%, #2b2b2b 10%, #222222 0%, #222222 50%) 0 / 15px 15px;
+}
+
+#gamelist{
+  width: 100%;
+  max-width: 250px;
+}
+
+#joingame_submit{
+  max-width: 250px;
+  width: 100%;
+}
+
+#scripts{
+  display: none;
+}
+
+#gamedata{
+  background: #5cb85c;
+  color: #fff;
+  width: calc(100% - 80px);
+  padding: 0 0 0 15px;
+  height: 20px;
+}
+
+input[type='text']{
+  border-radius: 5px;
+  padding: 3px 5px 3px 5px;
+  border: 1px;
+}
+
+#message{
+  height: 25px;
+  width: 401px;
+  margin: 0 auto;
+  background: #5cb85c;
+  border-top: 1px solid #000;
+  color: #fff;
+  text-align: center;
+  clear: right;
+}
+
+#gamesize{
+  width: 159px;
+  margin-bottom: 5px;
+}
+
+label[for=gamesize] {
+  color: #fff;
+  background: #428bca;
+  padding: 0 2px 0 2px;
+  border-radius: 5px;
+  margin-right: 3px;
+  font-weight: lighter;
+}
+
+/* --- N E O N    T E X T --- */
+@keyframes neonBlueText {
+  from {
+    text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #228DFF, 0 0 70px #228DFF, 0 0 80px #228DFF, 0 0 100px #228DFF, 0 0 150px #228DFF;
+  }
+  to {
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #228DFF, 0 0 35px #228DFF, 0 0 40px #228DFF, 0 0 50px #228DFF, 0 0 75px #228DFF;
+  }
+}
+
+@keyframes neonOrangeText {
+  from {
+    text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #FF9900, 0 0 70px #FF9900, 0 0 80px #FF9900, 0 0 100px #FF9900, 0 0 150px #FF9900;
+  }
+  to {
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #FF9900, 0 0 35px #FF9900, 0 0 40px #FF9900, 0 0 50px #FF9900, 0 0 75px #FF9900;
+  }
+}
+
+@keyframes neonGreenText {
+  from {
+    text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #B6FF00, 0 0 70px #B6FF00, 0 0 80px #B6FF00, 0 0 100px #B6FF00, 0 0 150px #B6FF00;
+  }
+  to {
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #B6FF00, 0 0 35px #B6FF00, 0 0 40px #B6FF00, 0 0 50px #B6FF00, 0 0 75px #B6FF00;
+  }
+}
+/* --- N E O N --- */
+
+/* animation: neon 1.5s ease-in-out infinite alternate; */
+
+@keyframes neonBlue {
+  from {
+    box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #228DFF, 0 0 70px #228DFF, 0 0 80px #228DFF, 0 0 100px #228DFF, 0 0 150px #228DFF;
+  }
+  to {
+    box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #228DFF, 0 0 35px #228DFF, 0 0 40px #228DFF, 0 0 50px #228DFF, 0 0 75px #228DFF;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+    #setup_wrapper {
+        width: 100%;
+    }
+    
+    #wrapper{
+      float: left;
+      width: calc(100% - 80px);
+    }
+
+}

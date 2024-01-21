@@ -1,0 +1,3 @@
+// When User connects -> get list of socket.io rooms and display to User
+// When User creates a socket.io room, broadscast to all connected users and update the rooms list
+//

@@ -2,8 +2,6 @@
 
 //window.onload = function() {
 
-import io from "";
-
 let socket = io(),
   a = (d) => {
     alert(d);

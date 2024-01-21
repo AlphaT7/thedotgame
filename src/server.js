@@ -1,14 +1,21 @@
-const express = require("express");
-const { createServer } = require("node:http");
-const { join } = require("node:path");
-
-const app = express();
-const server = createServer(app);
-
-app.get("/", (req, res) => {
-  res.sendFile(join(__dirname, "index.html"));
+const httpServer = require("http").createServer();
+const io = require("socket.io")(httpServer, {
+  cors: {
+    origin: "http://localhost:3001",
+    methods: ["GET", "POST"],
+  },
 });
 
-server.listen(3000, () => {
-  console.log("server running at http://localhost:3000");
+httpServer.listen(3000);
+
+io.on("connection", (socket) => {
+  console.log("a user connected");
+
+  socket.on("test", (details) => {
+    console.log(details);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+  });
 });

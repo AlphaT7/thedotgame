@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <title>The Dot Game - CTF</title>
-    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
-    <meta content="utf-8" http-equiv="encoding">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link async rel="shortcut icon" href="img/flag.ico" type="image/x-icon" />
@@ -31,7 +30,6 @@
 
             <footer>
                 <div id="gamestatus">Setup Pending...</div>
-
             </footer>
 
         </section>
@@ -43,21 +41,28 @@
                 <input type="submit" id="uid_submit" value="Submit" />
             </form> -->
 
-            <form id="creategame_wrapper">
-                <div>Create a New Game <br> (Blue Team)</div>
-                <input id="gamename" type="text" placeholder="Game Name" required pattern="[A-Za-z0-9_]+" />
-                <input type="submit" id="gamename_submit" value="Submit" />
-            </form>
+            <fieldset id="creategamegroup">
+                <form id="creategame">
+                    <div>Create a New Game <br> (Blue Team)</div>
+                    <!-- <input name="gamename" type="text" id="gamename placeholder="Game Name" required pattern="[A-Za-z0-9_]+" /> -->
+                    <input name="gamename" type="text" id="gamename" placeholder="Game Name" required />
+                    <input type="submit" value="Submit" />
+                </form>
+            </fieldset>
 
-            <form id="joingame_wrapper">
-                <div>Join a Game <br> (Red Tean)</div>
-                <select id="gamelist" size="5" required>
-                </select><br>
-                <input type="submit" id="joingame_submit" value="Join Game"><br>
-            </form>
+            <fieldset id="joingamegroup">
+                <form id="joingame">
+                    <div>Join a Game <br> (Red Tean)</div>
+                    <select title="Join a Game" id="gamelist" name="gamelist" size="5" required>
+                    </select><br>
+                    <input type="submit" value="Join Game"><br>
+                </form>
+            </fieldset>
 
-            <form>
+            <form id="gamedetails">
                 <div>Game Details</div>
+                <input title="Connected Game" type="text" id="gameid">
+                <input title="Latency" type="text" id="latency">
             </form>
 
         </section>

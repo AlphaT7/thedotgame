@@ -107,6 +107,16 @@ header #title {
   display: block;
 }
 
+#gamedetails input {
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+fieldset {
+  border: none;
+}
+
 footer {
   font-size: 18px;
   background: var(--evergreen);
@@ -114,6 +124,6 @@ footer {
   border: 1px solid #000;
   display: flex;
   flex: 1;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
 }

@@ -1,4 +1,5 @@
 import { io } from "socket.io-client";
+
 const $ = document.querySelector.bind(document);
 const log = console.log.bind(console);
 
@@ -14,21 +15,9 @@ document.addEventListener("DOMContentLoaded", () => {
   socket.emit("latency", Date.now());
 });
 
-$("#canvas").style.display = "block";
+// $("#canvas").style.display = "block";
 
-$("#handle").addEventListener("click", () => {
-  let status = $("#handle").dataset.state;
-  let panel = $("#inner_wrapper");
-  if (status == "open" || status == undefined) {
-    $("#handle").dataset.state = "closed";
-    $("#handle").innerHTML = "chevron_right";
-    panel.classList.toggle("showPanel");
-  } else {
-    $("#handle").dataset.state = "open";
-    $("#handle").innerHTML = "chevron_left";
-    panel.classList.toggle("showPanel");
-  }
-});
+$("#handle").addEventListener("click", handle);
 
 $("#creategame").addEventListener("submit", (e) => {
   e.preventDefault();
@@ -43,6 +32,25 @@ $("#joingame").addEventListener("submit", (e) => {
 });
 
 /* Functions */
+
+function handle() {
+  let status = $("#handle").dataset.state;
+  let panel = $("#inner_wrapper");
+  if (status == "open" || status == undefined) {
+    $("#handle").dataset.state = "closed";
+    $("#handle").innerHTML = "chevron_right";
+    panel.classList.toggle("showPanel");
+  } else {
+    $("#handle").dataset.state = "open";
+    $("#handle").innerHTML = "chevron_left";
+    panel.classList.toggle("showPanel");
+  }
+}
+
+function startgame() {
+  $("#gamestatus").innerHTML = "The Game is Live";
+  handle();
+}
 
 function gamelistupdate(data) {
   $("#gamelist").innerHTML = "";
@@ -61,6 +69,7 @@ function joingame(data) {
 
 function newgame(data) {
   $("#gamename").value = "";
+  $("#gamestatus").innerHTML = "Waiting for Opponent";
   $("#gameid").value = data;
   $("#creategamegroup").disabled = true;
   $("#joingamegroup").disabled = true;
@@ -68,8 +77,9 @@ function newgame(data) {
 
 function gameover() {
   $("#gameid").value = "";
-  $("#creategamegroup").disabled = true;
-  $("#joingamegroup").disabled = true;
+  $("#gamestatus").innerHTML = "Game Over";
+  $("#creategamegroup").disabled = false;
+  $("#joingamegroup").disabled = false;
 }
 
 /* Socket.IO Events */
@@ -106,4 +116,8 @@ socket.on("joingame", (data) => {
 
 socket.on("newgame", (data) => {
   newgame(data);
+});
+
+socket.on("startgame", () => {
+  startgame();
 });

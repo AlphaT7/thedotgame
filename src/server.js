@@ -77,10 +77,9 @@ function joingame(gamename, socket) {
     );
     update.run(socket.id, gamename);
     socket.join(gamename);
-    log(gamelist(), "gamelist");
-    io.emit("gamelistupdate", gamelist());
     socket.emit("joingame", gamename);
-    socket.emit("success", "Red player initalized. Game is now Live!");
+    io.emit("gamelistupdate", gamelist());
+    io.to(gamename).emit("startgame");
   } else {
     // otherwise notify the player that it is already in use;
     socket.emit("error", "Game name does not exist!");

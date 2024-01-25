@@ -2,7 +2,7 @@
   "name": "thedotgame",
   "version": "1.0.0",
   "description": "A Capture the Flag game, but with dots",
-  "main": "server.js",
+  "main": "src/server.js",
   "scripts": {
     "dev": "vite",
     "build": "npx vite build && workbox generateSW workbox-config.js",

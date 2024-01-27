@@ -54,7 +54,15 @@ function gameover() {
 }
 
 function doubleTap() {
-  Shapes.seekingMine(pointer);
+  for (let i = 0; i < 3; i++) {
+    if (!uiObjects.playerUnits[i].active) {
+      uiObjects.playerUnits[i].x = pointer.x;
+      uiObjects.playerUnits[i].y = pointer.y;
+      uiObjects.playerUnits[i].active = true;
+      uiObjects.playerUnits[i].type = "mine";
+      break;
+    }
+  }
 }
 
 function inputstart() {
@@ -114,7 +122,6 @@ function animationUpdate() {
 function animationRender() {
   Shapes.touchRadius(uiObjects.touchTicks, pointer.x, pointer.y);
 
-  // update directional indicator
   if (pointer.active && uiObjects.touchTicks > 59) {
     if ("vibrate" in navigator && pointer.vibrate) {
       pointer.vibrate = false;
@@ -125,9 +132,11 @@ function animationRender() {
     let inputChanged =
       Math.abs(pointer.y - pointer.shiftedY) > 55 ||
       Math.abs(pointer.x - pointer.shiftedX) > 55;
-    log(inputChanged);
     if (inputChanged) Shapes.directional(pointer);
   }
+
+  // render
+  Shapes.seekingMine(uiObjects.playerUnits);
 }
 
 /* GLOBAL VARIABLES */
@@ -158,6 +167,11 @@ let pointer = {
 
 let uiObjects = {
   touchTicks: 0,
+  playerUnits: [
+    { x: 0, y: 0, active: false, type: undefined },
+    { x: 0, y: 0, active: false, type: undefined },
+    { x: 0, y: 0, active: false, type: undefined },
+  ],
 };
 
 const animationLoop = {

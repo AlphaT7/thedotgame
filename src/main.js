@@ -1,6 +1,6 @@
 /* MODULE IMPORTS */
 // import { io } from "socket.io-client";
-import * as Touch from "./modules/touch";
+import * as Shapes from "./modules/shapes.js";
 
 /* FUNCTIONS */
 
@@ -53,25 +53,19 @@ function gameover() {
   $("#joingamegroup").disabled = false;
 }
 
-function inputstart(e) {
-  userinput.live = true;
-  userinput.ts = Date.now();
+function doubleTap() {
+  Shapes.seekingMine(pointer);
 }
 
-function inputrelease(e) {
-  userinput.live = false;
+function inputstart() {
+  pointer.active = true;
+  pointer.start = Date.now();
 }
 
-function animationUpdate() {
-  // update press/hold indicator
-  let timeElapsed = Date.now() - userinput.ts;
-  if (userinput.live && uiObjects.touchTicks < 60 && timeElapsed > 200) {
-    uiObjects.touchTicks += 4;
-  } else if (!userinput.live && uiObjects.touchTicks > 0) {
-    uiObjects.touchTicks -= 8;
-  } else if (!userinput.live && uiObjects.touchTicks < 0) {
-    uiObjects.touchTicks = 0;
-  }
+function inputrelease() {
+  if (Date.now() - pointer.end < 300) doubleTap();
+  pointer.active = false;
+  pointer.end = Date.now();
 }
 
 function setCoordinates(e) {
@@ -79,17 +73,61 @@ function setCoordinates(e) {
 
   if ("touches" in e) {
     // if event is a "touch"
-    userinput.x = e.touches[0].clientX - rect.left;
-    userinput.y = e.touches[0].clientY - rect.top;
+    pointer.x = e.touches[0].clientX - rect.left;
+    pointer.y = e.touches[0].clientY - rect.top;
   } else {
     //otherwise it's a mouse event
-    userinput.x = e.clientX - rect.left;
-    userinput.y = e.clientY - rect.top;
+    pointer.x = e.clientX - rect.left;
+    pointer.y = e.clientY - rect.top;
+  }
+}
+
+function shiftCoordinates(e) {
+  let rect = e.target.getBoundingClientRect();
+
+  if ("touches" in e) {
+    // event is a "touch"
+    pointer.shiftedX = e.touches[0].clientX - rect.left;
+    pointer.shiftedY = e.touches[0].clientY - rect.top;
+  } else {
+    // otherwise it's a mouse event
+    pointer.shiftedX = e.clientX - rect.left;
+    pointer.shiftedY = e.clientY - rect.top;
+  }
+}
+
+function animationUpdate() {
+  // update press/hold indicator
+  let timeElapsed = Date.now() - pointer.start;
+  if (pointer.active && uiObjects.touchTicks < 60 && timeElapsed > 200) {
+    uiObjects.touchTicks += 4;
+    pointer.shiftedX = pointer.x;
+    pointer.shiftedY = pointer.y;
+  } else if (!pointer.active && uiObjects.touchTicks > 0) {
+    uiObjects.touchTicks -= 8;
+  } else if (!pointer.active && uiObjects.touchTicks < 0) {
+    uiObjects.touchTicks = 0;
+    pointer.vibrate = true;
   }
 }
 
 function animationRender() {
-  Touch.press(uiObjects.touchTicks, userinput.x, userinput.y);
+  Shapes.touchRadius(uiObjects.touchTicks, pointer.x, pointer.y);
+
+  // update directional indicator
+  if (pointer.active && uiObjects.touchTicks > 59) {
+    if ("vibrate" in navigator && pointer.vibrate) {
+      pointer.vibrate = false;
+      navigator.vibrate(15);
+    }
+
+    // if the pointer coordinates are outside of the touchRadius, then draw the directional;
+    let inputChanged =
+      Math.abs(pointer.y - pointer.shiftedY) > 55 ||
+      Math.abs(pointer.x - pointer.shiftedX) > 55;
+    log(inputChanged);
+    if (inputChanged) Shapes.directional(pointer);
+  }
 }
 
 /* GLOBAL VARIABLES */
@@ -107,11 +145,15 @@ let domain =
 // });
 
 let gamelive = true;
-let userinput = {
-  live: false,
+let pointer = {
+  active: false,
   x: 0,
   y: 0,
-  ts: Date.now(),
+  shiftedX: 0,
+  shiftedY: 0,
+  vibrate: true,
+  start: Date.now(),
+  end: Date.now(),
 };
 
 let uiObjects = {
@@ -190,6 +232,11 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.width = 375;
   canvas.height = 500;
   // socket.emit("latency", Date.now());
+  animationLoop.start();
+});
+
+document.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
 });
 
 $("#handle").addEventListener("click", handle);
@@ -208,14 +255,19 @@ $("#joingame").addEventListener("submit", (e) => {
 
 $("#canvas").addEventListener("mousedown", (e) => {
   setCoordinates(e);
-  inputstart(e);
+  inputstart();
 });
 
 $("#canvas").addEventListener("mouseup", (e) => {
   inputrelease();
 });
 
+$("#canvas").addEventListener("mousemove", (e) => {
+  shiftCoordinates(e);
+});
+
 $("#canvas").addEventListener("touchstart", (e) => {
+  e.preventDefault();
   setCoordinates(e);
   inputstart(e);
 });
@@ -224,6 +276,7 @@ $("#canvas").addEventListener("touchend", (e) => {
   inputrelease();
 });
 
-/* FUNCTION CALLS */
-
-animationLoop.start();
+$("#canvas").addEventListener("touchmove", (e) => {
+  e.preventDefault();
+  shiftCoordinates(e);
+});

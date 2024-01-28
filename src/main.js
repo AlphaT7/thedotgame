@@ -65,6 +65,16 @@ function doubleTap() {
   }
 }
 
+function isOutOfBounds(x, y) {
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(canvas.width, 0);
+  ctx.lineTo(canvas.width, canvas.height / 2);
+  ctx.lineTo(0, canvas.height / 2);
+  ctx.closePath();
+  return ctx.isPointInPath(x, y);
+}
+
 function inputstart() {
   pointer.active = true;
   pointer.start = Date.now();
@@ -73,6 +83,7 @@ function inputstart() {
 function inputrelease() {
   if (Date.now() - pointer.end < 300) doubleTap();
   pointer.active = false;
+  pointer.outofbounds = false;
   pointer.end = Date.now();
 }
 
@@ -107,7 +118,13 @@ function shiftCoordinates(e) {
 function animationUpdate() {
   // update press/hold indicator
   let timeElapsed = Date.now() - pointer.start;
-  if (pointer.active && uiObjects.touchTicks < 60 && timeElapsed > 200) {
+  if (
+    pointer.active &&
+    uiObjects.touchTicks < 60 &&
+    timeElapsed > 200 &&
+    !pointer.outofbounds
+  ) {
+    pointer.outofbounds = isOutOfBounds(pointer.x, pointer.y);
     uiObjects.touchTicks += 4;
     pointer.shiftedX = pointer.x;
     pointer.shiftedY = pointer.y;
@@ -120,6 +137,10 @@ function animationUpdate() {
 }
 
 function animationRender() {
+  Shapes.boundryLine();
+
+  Shapes.seekingMine(uiObjects.playerUnits);
+
   Shapes.touchRadius(uiObjects.touchTicks, pointer.x, pointer.y);
 
   if (pointer.active && uiObjects.touchTicks > 59) {
@@ -132,11 +153,14 @@ function animationRender() {
     let inputChanged =
       Math.abs(pointer.y - pointer.shiftedY) > 55 ||
       Math.abs(pointer.x - pointer.shiftedX) > 55;
-    if (inputChanged) Shapes.directional(pointer);
+    if (inputChanged && !pointer.outofbounds) Shapes.directional(pointer);
   }
 
-  // render
-  Shapes.seekingMine(uiObjects.playerUnits);
+  Shapes.playerGoal();
+
+  Shapes.playerFlag(uiObjects.playerFlag);
+
+  Shapes.showBoundry(pointer.outofbounds);
 }
 
 /* GLOBAL VARIABLES */
@@ -146,14 +170,13 @@ const log = console.log.bind(console);
 const canvas = $("#canvas");
 const ctx = canvas.getContext("2d");
 
-let domain =
-  window.location.protocol + "//" + window.location.hostname + ":3000";
+//  window.location.protocol + "//" + window.location.hostname + ":3000";
 
 // const socket = io(domain, {
 //   withCredentials: false,
 // });
 
-let gamelive = true;
+//let gamelive = true;
 let pointer = {
   active: false,
   x: 0,
@@ -163,6 +186,7 @@ let pointer = {
   vibrate: true,
   start: Date.now(),
   end: Date.now(),
+  outofbounds: false,
 };
 
 let uiObjects = {
@@ -172,6 +196,15 @@ let uiObjects = {
     { x: 0, y: 0, active: false, type: undefined },
     { x: 0, y: 0, active: false, type: undefined },
   ],
+  playerFlag: {
+    img: new Image(),
+    x: 0,
+    y: 0,
+  },
+  playerGoal: {
+    x: 5,
+    y: canvas.height - 5,
+  },
 };
 
 const animationLoop = {
@@ -247,6 +280,9 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.height = 500;
   // socket.emit("latency", Date.now());
   animationLoop.start();
+  uiObjects.playerFlag.img.src = "./img/blue-flag.png";
+  uiObjects.playerFlag.x = canvas.width - 20;
+  uiObjects.playerFlag.y = canvas.height - 20;
 });
 
 document.addEventListener("contextmenu", (e) => {

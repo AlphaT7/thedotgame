@@ -72,7 +72,7 @@ function drawSeekingMine(centerX, centerY) {
   function circleTicks() {
     let r1;
     let r2 = 30;
-    let color = "#FFA500";
+    let color = "rgba(128, 232, 221, .25)";
     let radianCircle = [];
 
     for (let i = 0, degrees = 90; i < 3; i++, degrees += 120) {
@@ -94,9 +94,9 @@ function drawSeekingMine(centerX, centerY) {
   // let color = "#80E8DD";
   let color = "#FFA500";
 
-  ctx.strokeStyle = "#FFA500";
+  ctx.strokeStyle = "#80E8DD";
   ctx.shadowColor = "#fff";
-  ctx.fillStyle = "rgba(255,255,255,0.85)";
+  ctx.fillStyle = "rgba(255,255,255,0.15)";
   ctx.shadowBlur = 15;
 
   ctx.beginPath();
@@ -121,7 +121,7 @@ function drawSeekingMine(centerX, centerY) {
       mineBlink.ts = Date.now();
     }
   }
-  ctx.strokeStyle = "#FFF";
+  ctx.strokeStyle = "rgba(255,255,255,0.1)";
   if (mineBlink.blink) {
     ctx.beginPath();
     ctx.arc(centerX, centerY, 60, radians(65), radians(115));
@@ -141,6 +141,47 @@ function drawSeekingMine(centerX, centerY) {
     ctx.stroke();
   }
   drawCircleTicks(circleTicks());
+}
+
+function showBoundry(isOutOfBounds) {
+  if (isOutOfBounds) {
+    ctx.reset();
+    ctx.rect(0, 0, canvas.width, canvas.height / 2);
+    ctx.fillStyle = "rgba(255, 0, 0, 0.25)";
+    ctx.fill();
+  }
+}
+
+function boundryLine() {
+  ctx.beginPath();
+  ctx.moveTo(0, canvas.height / 2 - 1);
+  ctx.lineTo(canvas.width, canvas.height / 2 - 1);
+  ctx.strokeStyle = "#fff";
+  ctx.stroke();
+}
+
+function playerGoal() {
+  ctx.shadowBlur = 0;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(0, canvas.height, 45, radians(270), radians(360));
+  ctx.strokeStyle = "rgba(92, 184, 92, .55)";
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(0, canvas.height, 30, radians(270), radians(360));
+  ctx.stroke();
+  ctx.lineWIdth = 1;
+}
+
+function playerFlag(flag) {
+  if (flag.img.complete) {
+    ctx.drawImage(flag.img, flag.x, flag.y);
+  }
+  ctx.beginPath();
+  // ctx.moveTo(flag.x, flag.y);
+  ctx.arc(flag.x + 5, flag.y + 5, 25, radians(0), radians(360));
+  ctx.strokeStyle = "#fff";
+  ctx.stroke();
 }
 
 function touchRadius(ticks, x, y) {
@@ -167,4 +208,12 @@ let mineBlink = {
   ts: Date.now(),
 };
 
-export { touchRadius, directional, seekingMine };
+export {
+  touchRadius,
+  directional,
+  seekingMine,
+  showBoundry,
+  boundryLine,
+  playerGoal,
+  playerFlag,
+};

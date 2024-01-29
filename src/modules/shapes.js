@@ -3,11 +3,35 @@ const log = console.log.bind(console);
 const canvas = $("#canvas");
 const ctx = canvas.getContext("2d");
 
+function init() {
+  canvas.width = 375;
+  canvas.height = 500;
+  Game.playerFlag.img.src = "./img/blue-flag.png";
+  Game.playerFlag.x = canvas.width - 20;
+  Game.playerFlag.y = canvas.height - 20;
+  Game.playerGoal.x = 5;
+  Game.playerGoal.y = canvas.height - 5;
+}
+
 function radians(degrees) {
   return degrees * (Math.PI / 180);
 }
 
-function drawCircleTicks(radianCircle) {
+function activateSeekingMine(pointer) {
+  for (let i = 0, count = 0; i < 3; count++, i++) {
+    if (!Game.playerUnits[i].active && count < 2) {
+      Game.playerUnits[i].x = pointer.x;
+      Game.playerUnits[i].y = pointer.y;
+      Game.playerUnits[i].active = true;
+      Game.playerUnits[i].type = "mine";
+      break;
+    }
+  }
+  log(pointer);
+  log(Game.playerUnits);
+}
+
+function drawCircleTicks(radianCircle, x, y) {
   radianCircle.forEach((tick) => {
     ctx.beginPath();
     ctx.strokeStyle = tick.color;
@@ -19,6 +43,7 @@ function drawCircleTicks(radianCircle) {
     ctx.stroke();
     ctx.stroke();
     ctx.stroke();
+    ctx.lineWidth = 1;
   });
 }
 
@@ -66,6 +91,7 @@ function drawDirectional(centerX, centerY, shiftedX, shiftedY) {
   ctx.moveTo(x1, y1);
   ctx.lineTo(x2, y2);
   ctx.stroke();
+  trajectory = { x1: x1, y1: y1, x2: x2, y2: y2 };
 }
 
 function drawSeekingMine(centerX, centerY) {
@@ -92,7 +118,7 @@ function drawSeekingMine(centerX, centerY) {
   }
 
   // let color = "#80E8DD";
-  let color = "#FFA500";
+  // let color = "#FFA500";
 
   ctx.strokeStyle = "#80E8DD";
   ctx.shadowColor = "#fff";
@@ -102,41 +128,47 @@ function drawSeekingMine(centerX, centerY) {
   ctx.beginPath();
   ctx.arc(centerX, centerY, 10, 0, radians(360));
 
-  if (mineBlink.blink) {
-    let timeElapsed = Date.now() - mineBlink.ts;
+  if (Game.mineBlink.blink) {
+    let timeElapsed = Date.now() - Game.mineBlink.ts;
     if (timeElapsed < 1000) {
       ctx.fill();
     } else {
-      mineBlink.blink = false;
-      mineBlink.ts = Date.now();
+      Game.mineBlink.blink = false;
+      Game.mineBlink.ts = Date.now();
     }
   }
 
-  if (!mineBlink.blink) {
-    let timeElapsed = Date.now() - mineBlink.ts;
+  if (!Game.mineBlink.blink) {
+    ctx.shadowColor = "#80E8DD";
+    let timeElapsed = Date.now() - Game.mineBlink.ts;
     if (timeElapsed < 1000) {
       ctx.stroke();
+      ctx.stroke();
+      ctx.stroke();
     } else {
-      mineBlink.blink = true;
-      mineBlink.ts = Date.now();
+      Game.mineBlink.blink = true;
+      Game.mineBlink.ts = Date.now();
     }
   }
-  ctx.strokeStyle = "rgba(255,255,255,0.1)";
-  if (mineBlink.blink) {
+  ctx.strokeStyle = "rgba(255,255,255,.2)";
+  if (Game.mineBlink.blink) {
     ctx.beginPath();
     ctx.arc(centerX, centerY, 60, radians(65), radians(115));
     ctx.stroke();
     ctx.stroke();
+    ctx.stroke();
   }
-  if (mineBlink.blink) {
+  if (Game.mineBlink.blink) {
     ctx.beginPath();
     ctx.arc(centerX, centerY, 60, radians(185), radians(235));
     ctx.stroke();
     ctx.stroke();
+    ctx.stroke();
   }
-  if (mineBlink.blink) {
+  if (Game.mineBlink.blink) {
     ctx.beginPath();
     ctx.arc(centerX, centerY, 60, radians(305), radians(355));
+    ctx.stroke();
     ctx.stroke();
     ctx.stroke();
   }
@@ -145,7 +177,8 @@ function drawSeekingMine(centerX, centerY) {
 
 function showBoundry(isOutOfBounds) {
   if (isOutOfBounds) {
-    ctx.reset();
+    ctx.shadowBlur = 0;
+    ctx.beginPath();
     ctx.rect(0, 0, canvas.width, canvas.height / 2);
     ctx.fillStyle = "rgba(255, 0, 0, 0.25)";
     ctx.fill();
@@ -161,59 +194,116 @@ function boundryLine() {
 }
 
 function playerGoal() {
-  ctx.shadowBlur = 0;
-  ctx.lineWidth = 2;
+  ctx.shadowColor = "rgba(92, 184, 92, 1)";
+  ctx.shadowBlur = 10;
   ctx.beginPath();
   ctx.arc(0, canvas.height, 45, radians(270), radians(360));
   ctx.strokeStyle = "rgba(92, 184, 92, .55)";
   ctx.stroke();
+  ctx.stroke();
+  ctx.stroke();
   ctx.beginPath();
   ctx.arc(0, canvas.height, 30, radians(270), radians(360));
   ctx.stroke();
-  ctx.lineWIdth = 1;
+  ctx.stroke();
+  ctx.stroke();
+  ctx.shadowBlur = 0;
 }
 
-function playerFlag(flag) {
+function playerFlag() {
+  let flag = Game.playerFlag;
   if (flag.img.complete) {
     ctx.drawImage(flag.img, flag.x, flag.y);
   }
   ctx.beginPath();
-  // ctx.moveTo(flag.x, flag.y);
   ctx.arc(flag.x + 5, flag.y + 5, 25, radians(0), radians(360));
   ctx.strokeStyle = "#fff";
+  ctx.shadowColor = "#FFF";
+  ctx.shadowBlur = 10;
   ctx.stroke();
 }
 
+function launchSeeker(ts) {
+  // for (let i = 0; i < 3; i++) {
+  //   if (!Game.playerUnits[i].active) {
+  //     Game.playerUnits[i].active = true;
+  //     Game.playerUnits[i].type = "seeker";
+  //   }
+  // }
+  // log(trajectory);
+}
+
 function touchRadius(ticks, x, y) {
-  drawCircleTicks(radiusTicks(ticks, x, y));
+  drawCircleTicks(radiusTicks(ticks, x, y), x, y);
 }
 
 function directional(pointer) {
-  drawDirectional(pointer.x, pointer.y, pointer.shiftedX, pointer.shiftedY);
+  // if the pointer coordinates are outside of the touchRadius, then draw the directional;
+  let inputChanged =
+    Math.abs(pointer.y - pointer.shiftedY) > 55 ||
+    Math.abs(pointer.x - pointer.shiftedX) > 55;
+  if (
+    inputChanged &&
+    !pointer.outofbounds &&
+    pointer.active &&
+    pointer.activeTicks >= 59
+  ) {
+    drawDirectional(pointer.x, pointer.y, pointer.shiftedX, pointer.shiftedY);
+  }
 }
 
-function seekingMine(playerUnits) {
-  let count = 0;
-
-  playerUnits.forEach((unit) => {
-    if (unit.active && unit.type == "mine" && count < 2) {
+function seekingMine() {
+  // for (let i = 0; i < 3; i++) {
+  //   if (Game.playerUnits[i].active) {
+  //     Game.playerUnits[i].x = pointer.x;
+  //     Game.playerUnits[i].y = pointer.y;
+  //     break;
+  //   }
+  // }
+  Game.playerUnits.forEach((unit) => {
+    if (unit.active && unit.type == "mine") {
       drawSeekingMine(unit.x, unit.y);
-      count++;
     }
   });
 }
 
-let mineBlink = {
-  blink: false,
-  ts: Date.now(),
+let Game = {
+  mineBlink: {
+    blink: false,
+    ts: Date.now(),
+  },
+  playerUnits: [
+    { x: 0, y: 0, active: false, type: undefined },
+    { x: 0, y: 0, active: false, type: undefined },
+    { x: 0, y: 0, active: false, type: undefined },
+  ],
+  playerFlag: {
+    img: new Image(),
+    x: 0,
+    y: 0,
+  },
+  playerGoal: {
+    x: 0,
+    y: 0,
+  },
+};
+
+let trajectory = {
+  x1: 0,
+  x2: 0,
+  y1: 0,
+  y2: 0,
 };
 
 export {
   touchRadius,
   directional,
   seekingMine,
+  activateSeekingMine,
   showBoundry,
   boundryLine,
   playerGoal,
   playerFlag,
+  launchSeeker,
+  init,
 };

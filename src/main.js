@@ -54,15 +54,7 @@ function gameover() {
 }
 
 function doubleTap() {
-  for (let i = 0; i < 3; i++) {
-    if (!uiObjects.playerUnits[i].active) {
-      uiObjects.playerUnits[i].x = pointer.x;
-      uiObjects.playerUnits[i].y = pointer.y;
-      uiObjects.playerUnits[i].active = true;
-      uiObjects.playerUnits[i].type = "mine";
-      break;
-    }
-  }
+  Shapes.activateSeekingMine({ x: pointer.x, y: pointer.y });
 }
 
 function isOutOfBounds(x, y) {
@@ -116,51 +108,46 @@ function shiftCoordinates(e) {
 }
 
 function animationUpdate() {
-  // update press/hold indicator
+  // indicate press & hold
   let timeElapsed = Date.now() - pointer.start;
   if (
     pointer.active &&
-    uiObjects.touchTicks < 60 &&
+    pointer.activeTicks < 60 &&
     timeElapsed > 200 &&
     !pointer.outofbounds
   ) {
     pointer.outofbounds = isOutOfBounds(pointer.x, pointer.y);
-    uiObjects.touchTicks += 4;
-    pointer.shiftedX = pointer.x;
-    pointer.shiftedY = pointer.y;
-  } else if (!pointer.active && uiObjects.touchTicks > 0) {
-    uiObjects.touchTicks -= 8;
-  } else if (!pointer.active && uiObjects.touchTicks < 0) {
-    uiObjects.touchTicks = 0;
-    pointer.vibrate = true;
+    if (!pointer.outofbounds) {
+      pointer.activeTicks += 4;
+      pointer.shiftedX = pointer.x;
+      pointer.shiftedY = pointer.y;
+    }
+  } else if (!pointer.active && pointer.activeTicks > 0) {
+    pointer.activeTicks -= 8;
+  } else if (!pointer.active && pointer.activeTicks < 0) {
+    pointer.activeTicks = 0;
+    pointer.vibration = true;
   }
 }
 
 function animationRender() {
   Shapes.boundryLine();
 
-  Shapes.seekingMine(uiObjects.playerUnits);
+  Shapes.seekingMine();
 
-  Shapes.touchRadius(uiObjects.touchTicks, pointer.x, pointer.y);
+  Shapes.touchRadius(pointer.activeTicks, pointer.x, pointer.y);
 
-  if (pointer.active && uiObjects.touchTicks > 59) {
-    if ("vibrate" in navigator && pointer.vibrate) {
-      pointer.vibrate = false;
-      navigator.vibrate(15);
-    }
+  Shapes.directional(pointer);
 
-    // if the pointer coordinates are outside of the touchRadius, then draw the directional;
-    let inputChanged =
-      Math.abs(pointer.y - pointer.shiftedY) > 55 ||
-      Math.abs(pointer.x - pointer.shiftedX) > 55;
-    if (inputChanged && !pointer.outofbounds) Shapes.directional(pointer);
-  }
+  pointer.vibrate();
 
   Shapes.playerGoal();
 
-  Shapes.playerFlag(uiObjects.playerFlag);
+  Shapes.playerFlag(pointer.playerFlag);
 
   Shapes.showBoundry(pointer.outofbounds);
+
+  Shapes.launchSeeker(pointer.end);
 }
 
 /* GLOBAL VARIABLES */
@@ -183,27 +170,18 @@ let pointer = {
   y: 0,
   shiftedX: 0,
   shiftedY: 0,
-  vibrate: true,
+  activeTicks: 0,
+  vibration: true,
   start: Date.now(),
   end: Date.now(),
   outofbounds: false,
-};
-
-let uiObjects = {
-  touchTicks: 0,
-  playerUnits: [
-    { x: 0, y: 0, active: false, type: undefined },
-    { x: 0, y: 0, active: false, type: undefined },
-    { x: 0, y: 0, active: false, type: undefined },
-  ],
-  playerFlag: {
-    img: new Image(),
-    x: 0,
-    y: 0,
-  },
-  playerGoal: {
-    x: 5,
-    y: canvas.height - 5,
+  vibrate: () => {
+    if (pointer.active && pointer.activeTicks >= 59) {
+      if ("vibrate" in navigator && pointer.vibration) {
+        pointer.vibration = false;
+        navigator.vibrate(15);
+      }
+    }
   },
 };
 
@@ -276,13 +254,9 @@ const animationLoop = {
 /* EVENT LISTENERS */
 
 document.addEventListener("DOMContentLoaded", () => {
-  canvas.width = 375;
-  canvas.height = 500;
   // socket.emit("latency", Date.now());
+  Shapes.init();
   animationLoop.start();
-  uiObjects.playerFlag.img.src = "./img/blue-flag.png";
-  uiObjects.playerFlag.x = canvas.width - 20;
-  uiObjects.playerFlag.y = canvas.height - 20;
 });
 
 document.addEventListener("contextmenu", (e) => {

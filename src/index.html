@@ -9,6 +9,25 @@
     <link async rel="shortcut icon" href="img/flag.ico" type="image/x-icon" />
     <link async rel="stylesheet" type="text/css" href="style.css">
     <script type="module" src="main.js"></script>
+    <!-- <script>
+        if ("serviceWorker" in navigator) {
+            // Register a service worker hosted at the root of the
+            // site using the default scope.
+            navigator.serviceWorker
+                // .register("sw.js", { scope: "/", type: "module", updateViaCache: "all" })
+                .register("sw.js", { scope: "/" })
+                .then(
+                    (registration) => {
+                        console.log("Service worker registration succeeded:", registration);
+                    },
+                    (error) => {
+                        console.error(`Service worker registration failed: ${error}`);
+                    }
+                );
+        } else {
+            alert("Service workers are not supported. Offline access not supported.");
+        }
+    </script> -->
 </head>
 
 <body>

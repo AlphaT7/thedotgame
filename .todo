@@ -1,3 +1,6 @@
 // When User connects -> get list of socket.io rooms and display to User
 // When User creates a socket.io room, broadscast to all connected users and update the rooms list
-//
+
+// Need to add swipe left/right to open/close the game setup interface;
+// Need to add swipe up/down to open/close the flag seeker options;
+// Need to remove the top title;

@@ -54,7 +54,18 @@ function gameover() {
 }
 
 function doubleTap() {
-  Shapes.activateSeekingMine({ x: pointer.x, y: pointer.y });
+  if (Date.now() - pointer.end < 200) {
+    Shapes.activateSeekingMine({ x: pointer.x, y: pointer.y });
+  }
+}
+
+function swipeLeft(e) {
+  log(e);
+  let coordinates = getEventCoordinates(e);
+  if (coordinates.x < pointer.x && !pointer.press) {
+    handle();
+    // log("swipe left");
+  }
 }
 
 function isOutOfBounds(x, y) {
@@ -70,27 +81,44 @@ function isOutOfBounds(x, y) {
 function inputstart() {
   pointer.active = true;
   pointer.start = Date.now();
+  pointer.shiftedX = pointer.x;
+  pointer.shiftedY = pointer.y;
+  if (pointer.end == undefined) pointer.end = Date.now();
 }
 
-function inputrelease() {
-  if (Date.now() - pointer.end < 300) doubleTap();
+function inputrelease(e) {
+  doubleTap();
+  swipeLeft(e);
   pointer.active = false;
   pointer.outofbounds = false;
   pointer.end = Date.now();
+  pointer.press = false;
 }
 
-function setCoordinates(e) {
+function getEventCoordinates(e) {
   let rect = e.target.getBoundingClientRect();
-
-  if ("touches" in e) {
+  if ("changedTouches" in e) {
+    // log(1, e.changedTouches[0].clientX);
     // if event is a "touch"
-    pointer.x = e.touches[0].clientX - rect.left;
-    pointer.y = e.touches[0].clientY - rect.top;
+    return {
+      x: e.changedTouches[0].clientX - rect.left,
+      y: e.changedTouches[0].clientY - rect.top,
+    };
   } else {
-    //otherwise it's a mouse event
-    pointer.x = e.clientX - rect.left;
-    pointer.y = e.clientY - rect.top;
+    log(2, e);
+    // otherwise it's a "mouse click" event
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
   }
+}
+
+function setPointerCoordinates(e) {
+  let coordinates = getEventCoordinates(e);
+  log(pointer.x, coordinates.x);
+  pointer.x = coordinates.x;
+  pointer.y = coordinates.y;
 }
 
 function shiftCoordinates(e) {
@@ -110,14 +138,20 @@ function shiftCoordinates(e) {
 function animationUpdate() {
   // indicate press & hold
   let timeElapsed = Date.now() - pointer.start;
+  let positionChanged =
+    Math.abs(pointer.y - pointer.shiftedY) > 0 ||
+    Math.abs(pointer.x - pointer.shiftedX) > 0;
+  log(positionChanged);
   if (
     pointer.active &&
     pointer.activeTicks < 60 &&
-    timeElapsed > 200 &&
+    timeElapsed > 350 &&
+    !positionChanged &&
     !pointer.outofbounds
   ) {
     pointer.outofbounds = isOutOfBounds(pointer.x, pointer.y);
     if (!pointer.outofbounds) {
+      pointer.press = true;
       pointer.activeTicks += 4;
       pointer.shiftedX = pointer.x;
       pointer.shiftedY = pointer.y;
@@ -143,7 +177,11 @@ function animationRender() {
 
   Shapes.playerGoal();
 
+  Shapes.opponentGoal();
+
   Shapes.playerFlag(pointer.playerFlag);
+
+  Shapes.opponentFlag();
 
   Shapes.showBoundry(pointer.outofbounds);
 
@@ -174,6 +212,7 @@ let pointer = {
   vibration: true,
   start: Date.now(),
   end: Date.now(),
+  press: false,
   outofbounds: false,
   vibrate: () => {
     if (pointer.active && pointer.activeTicks >= 59) {
@@ -253,9 +292,9 @@ const animationLoop = {
 
 /* EVENT LISTENERS */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   // socket.emit("latency", Date.now());
-  Shapes.init();
+  await Shapes.init();
   animationLoop.start();
 });
 
@@ -263,7 +302,7 @@ document.addEventListener("contextmenu", (e) => {
   e.preventDefault();
 });
 
-$("#handle").addEventListener("click", handle);
+// $("#handle").addEventListener("click", handle);
 
 $("#creategame").addEventListener("submit", (e) => {
   e.preventDefault();
@@ -278,12 +317,12 @@ $("#joingame").addEventListener("submit", (e) => {
 });
 
 $("#canvas").addEventListener("mousedown", (e) => {
-  setCoordinates(e);
+  setPointerCoordinates(e);
   inputstart();
 });
 
 $("#canvas").addEventListener("mouseup", (e) => {
-  inputrelease();
+  inputrelease(e);
 });
 
 $("#canvas").addEventListener("mousemove", (e) => {
@@ -292,12 +331,12 @@ $("#canvas").addEventListener("mousemove", (e) => {
 
 $("#canvas").addEventListener("touchstart", (e) => {
   e.preventDefault();
-  setCoordinates(e);
+  setPointerCoordinates(e);
   inputstart(e);
 });
 
 $("#canvas").addEventListener("touchend", (e) => {
-  inputrelease();
+  inputrelease(e);
 });
 
 $("#canvas").addEventListener("touchmove", (e) => {

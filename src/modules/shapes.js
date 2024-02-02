@@ -3,14 +3,19 @@ const log = console.log.bind(console);
 const canvas = $("#canvas");
 const ctx = canvas.getContext("2d");
 
-function init() {
+async function init() {
   canvas.width = 375;
   canvas.height = 500;
   Game.playerFlag.img.src = "./img/blue-flag.png";
-  Game.playerFlag.x = canvas.width - 20;
-  Game.playerFlag.y = canvas.height - 20;
-  Game.playerGoal.x = 5;
-  Game.playerGoal.y = canvas.height - 5;
+  Game.playerFlag.x = canvas.width - 25;
+  Game.playerFlag.y = canvas.height - 25;
+  Game.opponentFlag.img.src = "./img/red-flag.png";
+  Game.opponentFlag.x = canvas.width - 25;
+  Game.opponentFlag.y = 10;
+  Game.playerGoal.x = 0;
+  Game.playerGoal.y = canvas.height;
+  Game.opponentGoal.x = 0;
+  Game.opponentGoal.y = 0;
 }
 
 function radians(degrees) {
@@ -193,12 +198,43 @@ function boundryLine() {
   ctx.stroke();
 }
 
-function playerGoal() {
-  ctx.shadowColor = "rgba(92, 184, 92, 1)";
+function opponentGoal() {
+  ctx.shadowColor = "rgba(255, 0, 0, 1)";
   ctx.shadowBlur = 10;
   ctx.beginPath();
-  ctx.arc(0, canvas.height, 45, radians(270), radians(360));
-  ctx.strokeStyle = "rgba(92, 184, 92, .55)";
+  ctx.arc(
+    Game.opponentGoal.x,
+    Game.opponentGoal.y,
+    30,
+    radians(0),
+    radians(90)
+  );
+  ctx.strokeStyle = "rgba(255, 0, 0, .55)";
+  ctx.stroke();
+  ctx.stroke();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(
+    Game.opponentGoal.x,
+    Game.opponentGoal.y,
+    45,
+    radians(0),
+    radians(90)
+  );
+  ctx.stroke();
+  ctx.stroke();
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+}
+
+function playerGoal() {
+  // ctx.shadowColor = "rgba(92, 184, 92, 1)";
+  ctx.shadowColor = "rgba(0, 109, 240, 1)";
+  ctx.shadowBlur = 10;
+  ctx.beginPath();
+  ctx.arc(Game.playerGoal.x, Game.playerGoal.y, 45, radians(270), radians(360));
+  // ctx.strokeStyle = "rgba(92, 184, 92, .55)";
+  ctx.strokeStyle = "rgba(0, 109, 240, .55)";
   ctx.stroke();
   ctx.stroke();
   ctx.stroke();
@@ -216,10 +252,21 @@ function playerFlag() {
     ctx.drawImage(flag.img, flag.x, flag.y);
   }
   ctx.beginPath();
-  ctx.arc(flag.x + 5, flag.y + 5, 25, radians(0), radians(360));
-  ctx.strokeStyle = "#fff";
-  ctx.shadowColor = "#FFF";
-  ctx.shadowBlur = 10;
+  ctx.arc(flag.x + 8, flag.y + 8, 25, radians(0), radians(360));
+  ctx.strokeStyle = "#006DF0";
+  ctx.stroke();
+}
+
+function opponentFlag() {
+  // the flag needs some adjustment for the coordinates to visually work
+  let flag = Game.opponentFlag;
+  if (flag.img.complete) {
+    ctx.drawImage(flag.img, flag.x, flag.y);
+  }
+
+  ctx.beginPath();
+  ctx.arc(flag.x + 8, flag.y + 8, 25, radians(0), radians(360));
+  ctx.strokeStyle = "red";
   ctx.stroke();
 }
 
@@ -286,6 +333,15 @@ let Game = {
     x: 0,
     y: 0,
   },
+  opponentFlag: {
+    img: new Image(),
+    x: 0,
+    y: 0,
+  },
+  opponentGoal: {
+    x: 0,
+    y: 0,
+  },
 };
 
 let trajectory = {
@@ -304,6 +360,8 @@ export {
   boundryLine,
   playerGoal,
   playerFlag,
+  opponentGoal,
+  opponentFlag,
   launchSeeker,
   init,
 };

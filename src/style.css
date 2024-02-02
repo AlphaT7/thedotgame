@@ -15,6 +15,9 @@ body {
 :root {
   --evergreen: #5cb85c;
   --boyantblue: #428bca;
+  --floatingdots: #80E8DD;
+  --floatingdots: #57bae5;
+  --background: #222;
 }
 
 * {
@@ -153,7 +156,7 @@ footer {
   top: 0;
   left: 0;
   z-index: -1;
-  background: #10646a;
+  background: var(--background);
   overflow: hidden;
 }
 
@@ -171,7 +174,7 @@ footer {
 
 
 .background span:nth-child(0) {
-  color: #57bae5;
+  color: var(--floatingdots);
   top: 93%;
   left: 14%;
   animation-duration: 29s;
@@ -181,7 +184,7 @@ footer {
 }
 
 .background span:nth-child(1) {
-  color: #57bae5;
+  color: var(--floatingdots);
   top: 79%;
   left: 24%;
   animation-duration: 52s;
@@ -191,7 +194,7 @@ footer {
 }
 
 .background span:nth-child(2) {
-  color: #57bae5;
+  color: var(--floatingdots);
   top: 87%;
   left: 27%;
   animation-duration: 14s;
@@ -201,7 +204,7 @@ footer {
 }
 
 .background span:nth-child(3) {
-  color: #57bae5;
+  color: var(--floatingdots);
   top: 26%;
   left: 48%;
   animation-duration: 29s;
@@ -211,7 +214,7 @@ footer {
 }
 
 .background span:nth-child(4) {
-  color: #57bae5;
+  color: var(--floatingdots);
   top: 35%;
   left: 16%;
   animation-duration: 22s;
@@ -221,7 +224,7 @@ footer {
 }
 
 .background span:nth-child(5) {
-  color: #57bae5;
+  color: var(--floatingdots);
   top: 1%;
   left: 2%;
   animation-duration: 17s;
@@ -231,7 +234,7 @@ footer {
 }
 
 .background span:nth-child(6) {
-  color: #57bae5;
+  color: var(--floatingdots);
   top: 75%;
   left: 62%;
   animation-duration: 40s;
@@ -241,7 +244,7 @@ footer {
 }
 
 .background span:nth-child(7) {
-  color: #57bae5;
+  color: var(--floatingdots);
   top: 26%;
   left: 38%;
   animation-duration: 55s;
@@ -251,7 +254,7 @@ footer {
 }
 
 .background span:nth-child(8) {
-  color: #57bae5;
+  color: var(--floatingdots);
   top: 98%;
   left: 97%;
   animation-duration: 15s;
@@ -261,7 +264,7 @@ footer {
 }
 
 .background span:nth-child(9) {
-  color: #57bae5;
+  color: var(--floatingdots);
   top: 47%;
   left: 29%;
   animation-duration: 53s;
@@ -271,7 +274,8 @@ footer {
 }
 
 .background span:nth-child(10) {
-  color: #57bae5;
+  color: var(--floatingdots);
+  ;
   top: 80%;
   left: 55%;
   animation-duration: 52s;
@@ -281,7 +285,7 @@ footer {
 }
 
 .background span:nth-child(11) {
-  color: #57bae5;
+  color: var(--floatingdots);
   top: 58%;
   left: 2%;
   animation-duration: 15s;
@@ -291,7 +295,7 @@ footer {
 }
 
 .background span:nth-child(12) {
-  color: #57bae5;
+  color: var(--floatingdots);
   top: 59%;
   left: 45%;
   animation-duration: 13s;
@@ -301,7 +305,7 @@ footer {
 }
 
 .background span:nth-child(13) {
-  color: #57bae5;
+  color: var(--floatingdots);
   top: 63%;
   left: 60%;
   animation-duration: 27s;

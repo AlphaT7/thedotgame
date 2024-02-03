@@ -91,19 +91,8 @@ header #title {
   align-items: center;
 }
 
-#handle {
-  background: var(--boyantblue);
-  width: 50px;
-  font-size: 32px;
-  border-left: 1px solid #000;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .showPanel {
-  margin-left: -325px !important;
+  margin-left: -350px !important;
 }
 
 #canvas {

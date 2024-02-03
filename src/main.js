@@ -4,23 +4,13 @@ import * as Shapes from "./modules/shapes.js";
 
 /* FUNCTIONS */
 
-function handle() {
-  let status = $("#handle").dataset.state;
-  let panel = $("#inner_wrapper");
-  if (status == "open" || status == undefined) {
-    $("#handle").dataset.state = "closed";
-    $("#handle").innerHTML = "chevron_right";
-    panel.classList.toggle("showPanel");
-  } else {
-    $("#handle").dataset.state = "open";
-    $("#handle").innerHTML = "chevron_left";
-    panel.classList.toggle("showPanel");
-  }
+function toggleSetupPanel() {
+  $("#inner_wrapper").classList.toggle("showPanel");
 }
 
 function startgame() {
   $("#gamestatus").innerHTML = "The Game is Live";
-  handle();
+  toggleSetupPanel();
 }
 
 function gamelistupdate(data) {
@@ -54,17 +44,47 @@ function gameover() {
 }
 
 function doubleTap() {
-  if (Date.now() - pointer.end < 200) {
+  let timeElapsed = Date.now() - pointer.end;
+  log(timeElapsed);
+  if (timeElapsed < 200) {
     Shapes.activateSeekingMine({ x: pointer.x, y: pointer.y });
   }
 }
 
-function swipeLeft(e) {
-  log(e);
+// function swipeLeft(e) {
+//   let coordinates = getEventCoordinates(e);
+//   if (coordinates.x < pointer.x && !pointer.press) {
+//     toggleSetupPanel();
+//   }
+// }
+
+// function swipeRight(e) {
+//   let coordinates = getEventCoordinates(e);
+//   if (coordinates.x > pointer.x && !pointer.press) {
+//     toggleSetupPanel();
+//   }
+// }
+
+function swipeHorizontal(e) {
   let coordinates = getEventCoordinates(e);
-  if (coordinates.x < pointer.x && !pointer.press) {
-    handle();
-    // log("swipe left");
+  let panel = $("#inner_wrapper");
+
+  let swipeLeft =
+    coordinates.x < pointer.x &&
+    !pointer.press &&
+    Date.now() - pointer.start < 350;
+
+  let swipeRight =
+    coordinates.x > pointer.x &&
+    !pointer.press &&
+    Date.now() - pointer.start < 350;
+
+  if (swipeLeft) {
+    panel.classList.add("showPanel");
+  }
+
+  if (swipeRight) {
+    panel.classList.remove("showPanel");
   }
 }
 
@@ -78,7 +98,7 @@ function isOutOfBounds(x, y) {
   return ctx.isPointInPath(x, y);
 }
 
-function inputstart() {
+function inputstart(e) {
   pointer.active = true;
   pointer.start = Date.now();
   pointer.shiftedX = pointer.x;
@@ -87,26 +107,24 @@ function inputstart() {
 }
 
 function inputrelease(e) {
-  doubleTap();
-  swipeLeft(e);
+  if (e.target == $("#canvas")) doubleTap();
   pointer.active = false;
   pointer.outofbounds = false;
   pointer.end = Date.now();
   pointer.press = false;
+  swipeHorizontal(e);
 }
 
 function getEventCoordinates(e) {
   let rect = e.target.getBoundingClientRect();
   if ("changedTouches" in e) {
-    // log(1, e.changedTouches[0].clientX);
-    // if event is a "touch"
+    // if event is a "touch" event then...
     return {
       x: e.changedTouches[0].clientX - rect.left,
       y: e.changedTouches[0].clientY - rect.top,
     };
   } else {
-    log(2, e);
-    // otherwise it's a "mouse click" event
+    // otherwise handle as a "mouse click" event
     return {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
@@ -116,7 +134,6 @@ function getEventCoordinates(e) {
 
 function setPointerCoordinates(e) {
   let coordinates = getEventCoordinates(e);
-  log(pointer.x, coordinates.x);
   pointer.x = coordinates.x;
   pointer.y = coordinates.y;
 }
@@ -141,7 +158,6 @@ function animationUpdate() {
   let positionChanged =
     Math.abs(pointer.y - pointer.shiftedY) > 0 ||
     Math.abs(pointer.x - pointer.shiftedX) > 0;
-  log(positionChanged);
   if (
     pointer.active &&
     pointer.activeTicks < 60 &&
@@ -213,6 +229,7 @@ let pointer = {
   start: Date.now(),
   end: Date.now(),
   press: false,
+  pressEnd: Date.now(),
   outofbounds: false,
   vibrate: () => {
     if (pointer.active && pointer.activeTicks >= 59) {
@@ -318,7 +335,7 @@ $("#joingame").addEventListener("submit", (e) => {
 
 $("#canvas").addEventListener("mousedown", (e) => {
   setPointerCoordinates(e);
-  inputstart();
+  inputstart(e);
 });
 
 $("#canvas").addEventListener("mouseup", (e) => {
@@ -336,6 +353,24 @@ $("#canvas").addEventListener("touchstart", (e) => {
 });
 
 $("#canvas").addEventListener("touchend", (e) => {
+  inputrelease(e);
+});
+
+$("#setup_wrapper").addEventListener("touchstart", (e) => {
+  inputstart(e);
+  setPointerCoordinates(e);
+});
+
+$("#setup_wrapper").addEventListener("mousedown", (e) => {
+  inputstart(e);
+  setPointerCoordinates(e);
+});
+
+$("#setup_wrapper").addEventListener("touchend", (e) => {
+  inputrelease(e);
+});
+
+$("#setup_wrapper").addEventListener("mouseup", (e) => {
   inputrelease(e);
 });
 

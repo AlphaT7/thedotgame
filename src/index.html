@@ -36,13 +36,6 @@
 
         <section id="inner_wrapper">
 
-            <header id="header">
-                <div id="title">The Dot Game</div>
-                <div id="handle" class="material">
-                    chevron_left
-                </div>
-            </header>
-
             <section id="game_wrapper">
                 <canvas id="canvas"></canvas>
             </section>
@@ -54,24 +47,23 @@
         </section>
 
         <section id="setup_wrapper">
-            <!-- <form id="createuser_wrapper">
-                <div>Create User Name</div>
-                <input id="username" type="text" placeholder="Your Username" required pattern="[A-Za-z0-9]+" />
-                <input type="submit" id="uid_submit" value="Submit" />
-            </form> -->
+
+            <header id="header">
+                <div id="title">The Dot Game</div>
+            </header>
 
             <fieldset id="creategamegroup">
                 <form id="creategame">
-                    <div>Create a New Game <br> (Blue Team)</div>
-                    <!-- <input name="gamename" type="text" id="gamename placeholder="Game Name" required pattern="[A-Za-z0-9_]+" /> -->
-                    <input name="gamename" type="text" id="gamename" placeholder="Game Name" required />
+                    <div>Create a New Game</div>
+                    <input name="gamename" type="text" id="gamename" placeholder="Game Name" pattern="[A-Za-z0-9_]+"
+                        required />
                     <input type="submit" value="Submit" />
                 </form>
             </fieldset>
 
             <fieldset id="joingamegroup">
                 <form id="joingame">
-                    <div>Join a Game <br> (Red Tean)</div>
+                    <div>Join a Game</div>
                     <select title="Join a Game" id="gamelist" name="gamelist" size="5" required>
                     </select><br>
                     <input type="submit" value="Join Game"><br>

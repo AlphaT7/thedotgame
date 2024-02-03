@@ -32,8 +32,6 @@ function activateSeekingMine(pointer) {
       break;
     }
   }
-  log(pointer);
-  log(Game.playerUnits);
 }
 
 function drawCircleTicks(radianCircle, x, y) {

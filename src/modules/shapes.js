@@ -3,9 +3,42 @@ const log = console.log.bind(console);
 const canvas = $("#canvas");
 const ctx = canvas.getContext("2d");
 
+async function displayCanvas() {
+  let sleep = async () => new Promise((resolve) => setTimeout(resolve, 20));
+  let maxW = 372;
+  let maxH = 622;
+
+  let expandW = async () => {
+    while (canvas.width < maxW) {
+      if (canvas.width + 30 <= maxW) {
+        canvas.width += 30;
+      } else {
+        canvas.width += maxW - canvas.width;
+      }
+      await sleep();
+    }
+  };
+
+  let expandH = async () => {
+    while (canvas.height < maxH) {
+      if (canvas.height + 30 <= maxH) {
+        canvas.height += 30;
+      } else {
+        canvas.height += maxH - canvas.height;
+      }
+      await sleep();
+    }
+  };
+
+  $("#canvas").classList.add("showCanvas");
+  await expandW();
+  await expandH();
+  $("#canvas").classList.add("colorCanvas");
+}
+
 async function init() {
-  canvas.width = 375;
-  canvas.height = 500;
+  await displayCanvas();
+
   Game.playerFlag.img.src = "./img/blue-flag.png";
   Game.playerFlag.x = canvas.width - 25;
   Game.playerFlag.y = canvas.height - 25;

@@ -34,51 +34,73 @@
 
     <section id="outer_wrapper">
 
-        <section id="inner_wrapper">
+        <section id="row_wrapper">
 
             <section id="game_wrapper">
-                <canvas id="canvas"></canvas>
+                <canvas id="canvas" width="2" height="2"></canvas>
             </section>
 
-            <footer>
-                <div id="gamestatus">Setup Pending</div>
-            </footer>
+            <section id="setup_wrapper">
+
+                <header id="header">
+                    <div id="title">The Dot Game</div>
+                </header>
+
+                <fieldset id="creategamegroup">
+                    <form id="creategame">
+                        <div class="input">
+                            <input name="gamename" type="text" id="gamename" placeholder="Game Name"
+                                pattern="[A-Za-z0-9_]+" required />
+                        </div>
+                        <div id="submitGameName" class="button ice">Create Game</div>
+                    </form>
+                </fieldset>
+
+                <fieldset id="joingamegroup">
+                    <form id="joingame">
+                        <div class="input">
+                            <select title="Join a Game" id="gamelist" name="gamelist" size="2" required>
+                            </select>
+                        </div>
+                        <div class="button ice">Join Game</div>
+                    </form>
+                </fieldset>
+
+                <fieldset>
+                    <img id="logo" src="img/ww_logo.png" alt="winters webs logo">
+                </fieldset>
+
+            </section>
 
         </section>
 
-        <section id="setup_wrapper">
-
-            <header id="header">
-                <div id="title">The Dot Game</div>
-            </header>
-
-            <fieldset id="creategamegroup">
-                <form id="creategame">
-                    <div>Create a New Game</div>
-                    <input name="gamename" type="text" id="gamename" placeholder="Game Name" pattern="[A-Za-z0-9_]+"
-                        required />
-                    <input type="submit" value="Submit" />
-                </form>
-            </fieldset>
-
-            <fieldset id="joingamegroup">
-                <form id="joingame">
-                    <div>Join a Game</div>
-                    <select title="Join a Game" id="gamelist" name="gamelist" size="5" required>
-                    </select><br>
-                    <input type="submit" value="Join Game"><br>
-                </form>
-            </fieldset>
-
-            <form id="gamedetails">
-                <div>Game Details</div>
-                <label for="gameid">Game Name</label><input title="Game Name" type="text" id="gameid">
-                <label for="latency">Latency</label><input title="Latency" type="text" id="latency">
-            </form>
-
+        <section id="buttons_wrapper">
+            <div class="material">rotate_90_degrees_cw</div>
+            <div class="material">pen_size_1</div>
+            <div class="material">rotate_90_degrees_ccw</div>
+            <div class="material">unknown_5</div>
+            <div class="material">shield</div>
+            <div class="material"></div>
+            <div class="material"></div>
+            <div class="material"></div>
+            <div class="material"></div>
+            <div class="material"></div>
+            <div class="material"></div>
+            <div class="material"></div>
+            <div class="material"></div>
+            <div class="material"></div>
+            <div class="material"></div>
+            <div class="material"></div>
+            <div class="material"></div>
+            <div class="material"></div>
         </section>
 
     </section>
+
+    <div id="ripple" class="showRipple">
+        <div></div>
+        <div></div>
+    </div>
 
     <section class="background">
         <span></span>

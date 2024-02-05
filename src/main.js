@@ -5,11 +5,10 @@ import * as Shapes from "./modules/shapes.js";
 /* FUNCTIONS */
 
 function toggleSetupPanel() {
-  $("#inner_wrapper").classList.toggle("showPanel");
+  $("#game_wrapper").classList.toggle("showPanel");
 }
 
 function startgame() {
-  $("#gamestatus").innerHTML = "The Game is Live";
   toggleSetupPanel();
 }
 
@@ -45,39 +44,26 @@ function gameover() {
 
 function doubleTap() {
   let timeElapsed = Date.now() - pointer.end;
-  log(timeElapsed);
   if (timeElapsed < 200) {
     Shapes.activateSeekingMine({ x: pointer.x, y: pointer.y });
   }
 }
 
-// function swipeLeft(e) {
-//   let coordinates = getEventCoordinates(e);
-//   if (coordinates.x < pointer.x && !pointer.press) {
-//     toggleSetupPanel();
-//   }
-// }
-
-// function swipeRight(e) {
-//   let coordinates = getEventCoordinates(e);
-//   if (coordinates.x > pointer.x && !pointer.press) {
-//     toggleSetupPanel();
-//   }
-// }
-
 function swipeHorizontal(e) {
   let coordinates = getEventCoordinates(e);
-  let panel = $("#inner_wrapper");
+  let panel = $("#game_wrapper");
 
   let swipeLeft =
     coordinates.x < pointer.x &&
+    Math.abs(coordinates.x - pointer.x) > 150 &&
     !pointer.press &&
-    Date.now() - pointer.start < 350;
+    !$("#row_wrapper").classList.contains("showButtons");
 
   let swipeRight =
     coordinates.x > pointer.x &&
+    Math.abs(coordinates.x - pointer.x) > 150 &&
     !pointer.press &&
-    Date.now() - pointer.start < 350;
+    !$("#row_wrapper").classList.contains("showButtons");
 
   if (swipeLeft) {
     panel.classList.add("showPanel");
@@ -85,6 +71,30 @@ function swipeHorizontal(e) {
 
   if (swipeRight) {
     panel.classList.remove("showPanel");
+  }
+}
+
+function swipeVertical(e) {
+  let coordinates = getEventCoordinates(e);
+  let panel = $("#row_wrapper");
+  let swipeUp =
+    coordinates.y < pointer.y &&
+    Math.abs(coordinates.y - pointer.y) > 150 &&
+    !pointer.press &&
+    !$("#game_wrapper").classList.contains("showPanel");
+
+  let swipeDown =
+    coordinates.y > pointer.y &&
+    Math.abs(coordinates.y - pointer.y) > 150 &&
+    !pointer.press &&
+    !$("#game_wrapper").classList.contains("showPanel");
+
+  if (swipeUp) {
+    panel.classList.add("showButtons");
+  }
+
+  if (swipeDown) {
+    panel.classList.remove("showButtons");
   }
 }
 
@@ -113,10 +123,11 @@ function inputrelease(e) {
   pointer.end = Date.now();
   pointer.press = false;
   swipeHorizontal(e);
+  swipeVertical(e);
 }
 
 function getEventCoordinates(e) {
-  let rect = e.target.getBoundingClientRect();
+  let rect = $("#canvas").getBoundingClientRect();
   if ("changedTouches" in e) {
     // if event is a "touch" event then...
     return {
@@ -311,50 +322,44 @@ const animationLoop = {
 
 document.addEventListener("DOMContentLoaded", async () => {
   // socket.emit("latency", Date.now());
-  await Shapes.init();
-  animationLoop.start();
+  // await Shapes.init();
+  // animationLoop.start();
 });
 
 document.addEventListener("contextmenu", (e) => {
   e.preventDefault();
 });
 
-// $("#handle").addEventListener("click", handle);
+/* OUTER WRAPPER */
 
-$("#creategame").addEventListener("submit", (e) => {
-  e.preventDefault();
-  let formData = new FormData(e.target);
-  socket.emit("newgame", formData.get("gamename"));
-});
-
-$("#joingame").addEventListener("submit", (e) => {
-  e.preventDefault();
-  let formData = new FormData(e.target);
-  socket.emit("joingame", formData.get("gamelist"));
-});
-
-$("#canvas").addEventListener("mousedown", (e) => {
+$("#outer_wrapper").addEventListener("mousedown", (e) => {
   setPointerCoordinates(e);
   inputstart(e);
 });
 
-$("#canvas").addEventListener("mouseup", (e) => {
+$("#outer_wrapper").addEventListener("mouseup", (e) => {
   inputrelease(e);
 });
 
-$("#canvas").addEventListener("mousemove", (e) => {
+$("#outer_wrapper").addEventListener("mousemove", (e) => {
   shiftCoordinates(e);
 });
 
-$("#canvas").addEventListener("touchstart", (e) => {
-  e.preventDefault();
+$("#outer_wrapper").addEventListener("touchstart", (e) => {
   setPointerCoordinates(e);
   inputstart(e);
 });
 
-$("#canvas").addEventListener("touchend", (e) => {
+$("#outer_wrapper").addEventListener("touchend", (e) => {
   inputrelease(e);
 });
+
+$("#outer_wrapper").addEventListener("touchmove", (e) => {
+  e.preventDefault();
+  shiftCoordinates(e);
+});
+
+/* SETUP WRAPPER */
 
 $("#setup_wrapper").addEventListener("touchstart", (e) => {
   inputstart(e);
@@ -374,7 +379,47 @@ $("#setup_wrapper").addEventListener("mouseup", (e) => {
   inputrelease(e);
 });
 
-$("#canvas").addEventListener("touchmove", (e) => {
+/* BUTTONS WRAPPER */
+
+$("#buttons_wrapper").addEventListener("touchstart", (e) => {
   e.preventDefault();
-  shiftCoordinates(e);
+  inputstart(e);
+  setPointerCoordinates(e);
+});
+
+$("#buttons_wrapper").addEventListener("mousedown", (e) => {
+  log("START");
+  e.preventDefault();
+  inputstart(e);
+  setPointerCoordinates(e);
+});
+
+$("#buttons_wrapper").addEventListener("touchend", (e) => {
+  inputrelease(e);
+});
+
+$("#buttons_wrapper").addEventListener("mouseup", (e) => {
+  log("END");
+  inputrelease(e);
+});
+
+/* BUTTONS */
+
+$("#submitGameName").addEventListener("click", (e) => {
+  let formData = new FormData($("#creategame"));
+  socket.emit("newgame", formData.get("gamename"));
+});
+
+$("#ripple").addEventListener("click", async (e) => {
+  $("#ripple").classList.add("hideripple");
+  setTimeout(() => {
+    $("#ripple").style.display = "none";
+  }, 1100);
+  await Shapes.init();
+  animationLoop.start();
+});
+
+$("#joingame").addEventListener("submit", (e) => {
+  let formData = new FormData($("#joingame"));
+  socket.emit("joingame", formData.get("gamelist"));
 });

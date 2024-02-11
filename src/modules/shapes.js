@@ -10,8 +10,8 @@ async function displayCanvas() {
 
   let expandW = async () => {
     while (canvas.width < maxW) {
-      if (canvas.width + 30 <= maxW) {
-        canvas.width += 30;
+      if (canvas.width + 14 <= maxW) {
+        canvas.width += 14;
       } else {
         canvas.width += maxW - canvas.width;
       }

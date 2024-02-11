@@ -59,6 +59,10 @@ body {
   user-select: auto !important;
 }
 
+#setup_wrapper fieldset:nth-child(4) {
+  background: rgb(27 41 53) !important;
+}
+
 #setup_wrapper fieldset form {
   text-align: center;
   width: 100%;
@@ -93,8 +97,7 @@ body {
 #logo {
   margin: 0 auto;
   display: block;
-  filter: drop-shadow(0px 0px 10px rgba(128, 232, 221, .75));
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 1));
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 1));
 }
 
 .button {
@@ -137,6 +140,7 @@ body {
 header {
   display: flex;
   background: rgba(124, 194, 246, .20);
+  background: rgb(27 41 53) !important;
   border: 1px solid rgba(124, 194, 246, 1);
   position: relative;
   justify-content: center;

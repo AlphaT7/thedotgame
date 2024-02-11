@@ -44,7 +44,7 @@ function gameover() {
 
 function doubleTap() {
   let timeElapsed = Date.now() - pointer.end;
-  if (timeElapsed < 200) {
+  if (timeElapsed < 300) {
     Shapes.activateSeekingMine({ x: pointer.x, y: pointer.y });
   }
 }
@@ -55,13 +55,13 @@ function swipeHorizontal(e) {
 
   let swipeLeft =
     coordinates.x < pointer.x &&
-    Math.abs(coordinates.x - pointer.x) > 150 &&
+    Math.abs(coordinates.x - pointer.x) > 100 &&
     !pointer.press &&
     !$("#row_wrapper").classList.contains("showButtons");
 
   let swipeRight =
     coordinates.x > pointer.x &&
-    Math.abs(coordinates.x - pointer.x) > 150 &&
+    Math.abs(coordinates.x - pointer.x) > 100 &&
     !pointer.press &&
     !$("#row_wrapper").classList.contains("showButtons");
 
@@ -79,13 +79,13 @@ function swipeVertical(e) {
   let panel = $("#row_wrapper");
   let swipeUp =
     coordinates.y < pointer.y &&
-    Math.abs(coordinates.y - pointer.y) > 150 &&
+    Math.abs(coordinates.y - pointer.y) > 100 &&
     !pointer.press &&
     !$("#game_wrapper").classList.contains("showPanel");
 
   let swipeDown =
     coordinates.y > pointer.y &&
-    Math.abs(coordinates.y - pointer.y) > 150 &&
+    Math.abs(coordinates.y - pointer.y) > 100 &&
     !pointer.press &&
     !$("#game_wrapper").classList.contains("showPanel");
 
@@ -117,6 +117,8 @@ function inputstart(e) {
 }
 
 function inputrelease(e) {
+  console.trace("Message");
+  console.log(e);
   if (e.target == $("#canvas")) doubleTap();
   pointer.active = false;
   pointer.outofbounds = false;
@@ -166,9 +168,11 @@ function shiftCoordinates(e) {
 function animationUpdate() {
   // indicate press & hold
   let timeElapsed = Date.now() - pointer.start;
+
   let positionChanged =
-    Math.abs(pointer.y - pointer.shiftedY) > 0 ||
-    Math.abs(pointer.x - pointer.shiftedX) > 0;
+    Math.abs(pointer.y - pointer.shiftedY) > 20 ||
+    Math.abs(pointer.x - pointer.shiftedX) > 20;
+
   if (
     pointer.active &&
     pointer.activeTicks < 60 &&
@@ -221,6 +225,10 @@ const $ = document.querySelector.bind(document);
 const log = console.log.bind(console);
 const canvas = $("#canvas");
 const ctx = canvas.getContext("2d");
+const regex =
+  /Mobi|Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+
+const isMobile = regex.test(navigator.userAgent);
 
 //  window.location.protocol + "//" + window.location.hostname + ":3000";
 
@@ -332,77 +340,82 @@ document.addEventListener("contextmenu", (e) => {
 
 /* OUTER WRAPPER */
 
-$("#outer_wrapper").addEventListener("mousedown", (e) => {
-  setPointerCoordinates(e);
-  inputstart(e);
-});
+if (isMobile) {
+  $("#outer_wrapper").addEventListener("touchstart", (e) => {
+    setPointerCoordinates(e);
+    inputstart(e);
+  });
 
-$("#outer_wrapper").addEventListener("mouseup", (e) => {
-  inputrelease(e);
-});
+  $("#outer_wrapper").addEventListener("touchend", (e) => {
+    inputrelease(e);
+  });
 
-$("#outer_wrapper").addEventListener("mousemove", (e) => {
-  shiftCoordinates(e);
-});
+  $("#outer_wrapper").addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    shiftCoordinates(e);
+  });
+} else {
+  $("#outer_wrapper").addEventListener("mousedown", (e) => {
+    setPointerCoordinates(e);
+    inputstart(e);
+  });
 
-$("#outer_wrapper").addEventListener("touchstart", (e) => {
-  setPointerCoordinates(e);
-  inputstart(e);
-});
+  $("#outer_wrapper").addEventListener("mouseup", (e) => {
+    inputrelease(e);
+  });
 
-$("#outer_wrapper").addEventListener("touchend", (e) => {
-  inputrelease(e);
-});
-
-$("#outer_wrapper").addEventListener("touchmove", (e) => {
-  e.preventDefault();
-  shiftCoordinates(e);
-});
+  $("#outer_wrapper").addEventListener("mousemove", (e) => {
+    shiftCoordinates(e);
+  });
+}
 
 /* SETUP WRAPPER */
 
-$("#setup_wrapper").addEventListener("touchstart", (e) => {
-  inputstart(e);
-  setPointerCoordinates(e);
-});
+if (isMobile) {
+  $("#setup_wrapper").addEventListener("touchstart", (e) => {
+    inputstart(e);
+    setPointerCoordinates(e);
+  });
 
-$("#setup_wrapper").addEventListener("mousedown", (e) => {
-  inputstart(e);
-  setPointerCoordinates(e);
-});
+  $("#setup_wrapper").addEventListener("touchend", (e) => {
+    inputrelease(e);
+  });
+} else {
+  $("#setup_wrapper").addEventListener("mousedown", (e) => {
+    inputstart(e);
+    setPointerCoordinates(e);
+  });
 
-$("#setup_wrapper").addEventListener("touchend", (e) => {
-  inputrelease(e);
-});
-
-$("#setup_wrapper").addEventListener("mouseup", (e) => {
-  inputrelease(e);
-});
+  $("#setup_wrapper").addEventListener("mouseup", (e) => {
+    inputrelease(e);
+  });
+}
 
 /* BUTTONS WRAPPER */
 
-$("#buttons_wrapper").addEventListener("touchstart", (e) => {
-  e.preventDefault();
-  inputstart(e);
-  setPointerCoordinates(e);
-});
+if (isMobile) {
+  $("#buttons_wrapper").addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    inputstart(e);
+    setPointerCoordinates(e);
+  });
 
-$("#buttons_wrapper").addEventListener("mousedown", (e) => {
-  log("START");
-  e.preventDefault();
-  inputstart(e);
-  setPointerCoordinates(e);
-});
+  $("#buttons_wrapper").addEventListener("touchend", (e) => {
+    inputrelease(e);
+  });
+} else {
+  $("#buttons_wrapper").addEventListener("mousedown", (e) => {
+    log("START");
+    e.preventDefault();
+    inputstart(e);
+    setPointerCoordinates(e);
+  });
 
-$("#buttons_wrapper").addEventListener("touchend", (e) => {
-  inputrelease(e);
-});
-
-$("#buttons_wrapper").addEventListener("mouseup", (e) => {
-  log("END");
-  inputrelease(e);
-});
-
+  $("#buttons_wrapper").addEventListener("mouseup", (e) => {
+    log("END");
+    inputrelease(e);
+  });
+}
 /* BUTTONS */
 
 $("#submitGameName").addEventListener("click", (e) => {

@@ -117,8 +117,6 @@ function inputstart(e) {
 }
 
 function inputrelease(e) {
-  console.trace("Message");
-  console.log(e);
   if (e.target == $("#canvas")) doubleTap();
   pointer.active = false;
   pointer.outofbounds = false;

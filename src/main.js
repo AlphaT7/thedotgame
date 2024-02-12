@@ -197,7 +197,7 @@ function animationRender() {
 
   Shapes.showBoundry(pointer.outofbounds);
 
-  Shapes.launchSeeker(pointer.end);
+  Shapes.flagSeeker(pointer.end);
 }
 
 /* GLOBAL VARIABLES */

@@ -193,7 +193,7 @@ header #title {
   touch-action: none;
   user-select: none;
   opacity: 0;
-  transition: all 0.5s ease;
+  transition: all 1s ease;
 }
 
 .showCanvas {
@@ -203,21 +203,17 @@ header #title {
 
 .colorCanvas {
   border: 1px solid rgba(128, 232, 221, 1);
-  animation: flare 0.45s ease;
+  animation: flare 1.55s ease;
   background: #2b2d2f;
 }
 
 @keyframes flare {
   from {
-    background: rgba(128, 232, 221, 0.25);
-  }
-
-  25% {
-    background: rgba(128, 232, 221, 0.25);
-  }
-
-  60% {
     background: rgba(255, 255, 255, 1);
+  }
+
+  20% {
+    background: rgba(128, 232, 221, 0.25);
   }
 
   to {

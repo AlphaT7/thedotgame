@@ -301,7 +301,7 @@ function opponentFlag() {
   ctx.stroke();
 }
 
-function launchSeeker(ts) {
+function flagSeeker(ts) {
   // for (let i = 0; i < 3; i++) {
   //   if (!Game.playerUnits[i].active) {
   //     Game.playerUnits[i].active = true;
@@ -393,6 +393,6 @@ export {
   playerFlag,
   opponentGoal,
   opponentFlag,
-  launchSeeker,
+  flagSeeker,
   init,
 };

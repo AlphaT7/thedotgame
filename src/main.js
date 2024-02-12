@@ -128,19 +128,10 @@ function inputrelease(e) {
 
 function getEventCoordinates(e) {
   let rect = $("#canvas").getBoundingClientRect();
-  if ("changedTouches" in e) {
-    // if event is a "touch" event then...
-    return {
-      x: e.changedTouches[0].clientX - rect.left,
-      y: e.changedTouches[0].clientY - rect.top,
-    };
-  } else {
-    // otherwise handle as a "mouse click" event
-    return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    };
-  }
+  return {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top,
+  };
 }
 
 function setPointerCoordinates(e) {
@@ -150,17 +141,9 @@ function setPointerCoordinates(e) {
 }
 
 function shiftCoordinates(e) {
-  let rect = e.target.getBoundingClientRect();
-
-  if ("touches" in e) {
-    // event is a "touch"
-    pointer.shiftedX = e.touches[0].clientX - rect.left;
-    pointer.shiftedY = e.touches[0].clientY - rect.top;
-  } else {
-    // otherwise it's a mouse event
-    pointer.shiftedX = e.clientX - rect.left;
-    pointer.shiftedY = e.clientY - rect.top;
-  }
+  let rect = $("#canvas").getBoundingClientRect();
+  pointer.shiftedX = e.clientX - rect.left;
+  pointer.shiftedY = e.clientY - rect.top;
 }
 
 function animationUpdate() {
@@ -326,94 +309,49 @@ const animationLoop = {
 
 /* EVENT LISTENERS */
 
-document.addEventListener("DOMContentLoaded", async () => {
-  // socket.emit("latency", Date.now());
-  // await Shapes.init();
-  // animationLoop.start();
-});
-
 document.addEventListener("contextmenu", (e) => {
   e.preventDefault();
 });
 
 /* OUTER WRAPPER */
 
-if (isMobile) {
-  $("#outer_wrapper").addEventListener("touchstart", (e) => {
-    setPointerCoordinates(e);
-    inputstart(e);
-  });
+// $("#outer_wrapper").addEventListener("pointerdown", (e) => {
+$("#canvas").addEventListener("pointerdown", (e) => {
+  setPointerCoordinates(e);
+  inputstart(e);
+});
 
-  $("#outer_wrapper").addEventListener("touchend", (e) => {
-    inputrelease(e);
-  });
+$("#canvas").addEventListener("pointerup", (e) => {
+  inputrelease(e);
+});
 
-  $("#outer_wrapper").addEventListener("touchmove", (e) => {
-    e.preventDefault();
-    shiftCoordinates(e);
-  });
-} else {
-  $("#outer_wrapper").addEventListener("mousedown", (e) => {
-    setPointerCoordinates(e);
-    inputstart(e);
-  });
-
-  $("#outer_wrapper").addEventListener("mouseup", (e) => {
-    inputrelease(e);
-  });
-
-  $("#outer_wrapper").addEventListener("mousemove", (e) => {
-    shiftCoordinates(e);
-  });
-}
+$("#canvas").addEventListener("pointermove", (e) => {
+  shiftCoordinates(e);
+});
 
 /* SETUP WRAPPER */
 
-if (isMobile) {
-  $("#setup_wrapper").addEventListener("touchstart", (e) => {
-    inputstart(e);
-    setPointerCoordinates(e);
-  });
+$("#setup_wrapper").addEventListener("pointerdown", (e) => {
+  inputstart(e);
+  setPointerCoordinates(e);
+});
 
-  $("#setup_wrapper").addEventListener("touchend", (e) => {
-    inputrelease(e);
-  });
-} else {
-  $("#setup_wrapper").addEventListener("mousedown", (e) => {
-    inputstart(e);
-    setPointerCoordinates(e);
-  });
-
-  $("#setup_wrapper").addEventListener("mouseup", (e) => {
-    inputrelease(e);
-  });
-}
+$("#setup_wrapper").addEventListener("pointerup", (e) => {
+  inputrelease(e);
+});
 
 /* BUTTONS WRAPPER */
 
-if (isMobile) {
-  $("#buttons_wrapper").addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    inputstart(e);
-    setPointerCoordinates(e);
-  });
+$("#buttons_wrapper").addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  inputstart(e);
+  setPointerCoordinates(e);
+});
 
-  $("#buttons_wrapper").addEventListener("touchend", (e) => {
-    inputrelease(e);
-  });
-} else {
-  $("#buttons_wrapper").addEventListener("mousedown", (e) => {
-    log("START");
-    e.preventDefault();
-    inputstart(e);
-    setPointerCoordinates(e);
-  });
+$("#buttons_wrapper").addEventListener("pointerup", (e) => {
+  inputrelease(e);
+});
 
-  $("#buttons_wrapper").addEventListener("mouseup", (e) => {
-    log("END");
-    inputrelease(e);
-  });
-}
 /* BUTTONS */
 
 $("#submitGameName").addEventListener("click", (e) => {

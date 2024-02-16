@@ -4,34 +4,36 @@ const canvas = $("#canvas");
 const ctx = canvas.getContext("2d");
 
 async function displayCanvas() {
-  let sleep = async () => new Promise((resolve) => setTimeout(resolve, 20));
+  let sleep = async (delay) =>
+    new Promise((resolve) => setTimeout(resolve, delay));
   let maxW = 372;
   let maxH = 622;
 
   let expandW = async () => {
     while (canvas.width < maxW) {
-      if (canvas.width + 14 <= maxW) {
-        canvas.width += 14;
+      if (canvas.width + 28 <= maxW) {
+        canvas.width += 28;
       } else {
         canvas.width += maxW - canvas.width;
       }
-      await sleep();
+      await sleep(20);
     }
   };
 
   let expandH = async () => {
     while (canvas.height < maxH) {
-      if (canvas.height + 30 <= maxH) {
-        canvas.height += 30;
+      if (canvas.height + 48 <= maxH) {
+        canvas.height += 48;
       } else {
         canvas.height += maxH - canvas.height;
       }
-      await sleep();
+      await sleep(20);
     }
   };
 
   $("#canvas").classList.add("showCanvas");
   await expandW();
+  await sleep(300);
   await expandH();
   $("#canvas").classList.add("colorCanvas");
 }
@@ -55,15 +57,25 @@ function radians(degrees) {
   return degrees * (Math.PI / 180);
 }
 
+function playerUnitCount() {
+  return (
+    Game.playerUnits.seeker.filter((unit) => unit.active).length +
+    Game.playerUnits.mine.filter((unit) => unit.active).length
+  );
+}
+
 function activateSeekingMine(pointer) {
-  for (let i = 0, count = 0; i < 3; count++, i++) {
-    if (!Game.playerUnits[i].active && count < 2) {
-      Game.playerUnits[i].x = pointer.x;
-      Game.playerUnits[i].y = pointer.y;
-      Game.playerUnits[i].active = true;
-      Game.playerUnits[i].type = "mine";
-      break;
-    }
+  let mineCount = Game.playerUnits.mine.filter((unit) => unit.active).length;
+  let underLimit =
+    playerUnitCount() < Game.playerUnitLimit &&
+    mineCount < Game.playerUnitTypeLimit;
+  let hasInactive = Game.playerUnits.mine.some((unit) => !unit.active);
+
+  if (underLimit && hasInactive) {
+    let newMine = Game.playerUnits.mine.filter((unit) => !unit.active)[0];
+    newMine.x = pointer.x;
+    newMine.y = pointer.y;
+    newMine.active = true;
   }
 }
 
@@ -127,7 +139,7 @@ function drawDirectional(centerX, centerY, shiftedX, shiftedY) {
   ctx.moveTo(x1, y1);
   ctx.lineTo(x2, y2);
   ctx.stroke();
-  trajectory = { x1: x1, y1: y1, x2: x2, y2: y2 };
+  Game.trajectory = { x1: x1, y1: y1, x2: x2, y2: y2 };
 }
 
 function drawSeekingMine(centerX, centerY) {
@@ -225,7 +237,7 @@ function boundryLine() {
   ctx.beginPath();
   ctx.moveTo(0, canvas.height / 2 - 1);
   ctx.lineTo(canvas.width, canvas.height / 2 - 1);
-  ctx.strokeStyle = "#fff";
+  ctx.strokeStyle = "rgba(128, 232, 221, 1)";
   ctx.stroke();
 }
 
@@ -282,6 +294,7 @@ function playerFlag() {
   if (flag.img.complete) {
     ctx.drawImage(flag.img, flag.x, flag.y);
   }
+
   ctx.beginPath();
   ctx.arc(flag.x + 8, flag.y + 8, 25, radians(0), radians(360));
   ctx.strokeStyle = "#006DF0";
@@ -301,14 +314,57 @@ function opponentFlag() {
   ctx.stroke();
 }
 
-function flagSeeker(ts) {
-  // for (let i = 0; i < 3; i++) {
-  //   if (!Game.playerUnits[i].active) {
-  //     Game.playerUnits[i].active = true;
-  //     Game.playerUnits[i].type = "seeker";
-  //   }
-  // }
-  // log(trajectory);
+function drawFlagSeeker(unit) {
+  ctx.beginPath();
+  ctx.fillStyle = "rgba(128, 232, 221, 0.25)";
+  ctx.arc(unit.x, unit.y, 20, radians(0), radians(360));
+  ctx.fill();
+}
+
+function flagSeeker() {
+  Game.playerUnits.seeker.forEach((unit) => {
+    if (unit.active && unit.type == "seeker") {
+      drawFlagSeeker(unit);
+    }
+  });
+}
+
+function seekerPreLaunch() {
+  let seekerCount = Game.playerUnits.seeker.filter(
+    (unit) => unit.active
+  ).length;
+  let underLimit =
+    playerUnitCount() < Game.playerUnitLimit &&
+    seekerCount < Game.playerUnitTypeLimit;
+
+  if (underLimit) {
+    let newSeeker = Game.playerUnits.seeker.filter((unit) => !unit.active)[0];
+    newSeeker.inQue = true;
+    newSeeker.type = "seeker";
+  }
+}
+
+function activateFlagSeeker() {
+  let seekerCount = Game.playerUnits.seeker.filter(
+    (unit) => unit.active
+  ).length;
+  let underLimit =
+    playerUnitCount() < Game.playerUnitLimit &&
+    seekerCount < Game.playerUnitTypeLimit;
+
+  let isInQue = Game.playerUnits.seeker.some((unit) => unit.inQue);
+
+  if (underLimit && isInQue) {
+    let newSeeker = Game.playerUnits.seeker.filter(
+      (unit) => !unit.active && unit.inQue
+    )[0];
+
+    newSeeker.x = Game.trajectory.x2;
+    newSeeker.y = Game.trajectory.y2;
+    newSeeker.active = true;
+    newSeeker.type = "seeker";
+    newSeeker.inQue = false;
+  }
 }
 
 function touchRadius(ticks, x, y) {
@@ -326,6 +382,7 @@ function directional(pointer) {
     pointer.active &&
     pointer.activeTicks >= 59
   ) {
+    if (!Game.playerUnits.seeker.some((unit) => unit.inQue)) seekerPreLaunch();
     drawDirectional(pointer.x, pointer.y, pointer.shiftedX, pointer.shiftedY);
   }
 }
@@ -338,10 +395,8 @@ function seekingMine() {
   //     break;
   //   }
   // }
-  Game.playerUnits.forEach((unit) => {
-    if (unit.active && unit.type == "mine") {
-      drawSeekingMine(unit.x, unit.y);
-    }
+  Game.playerUnits.mine.forEach((unit) => {
+    if (unit.active) drawSeekingMine(unit.x, unit.y);
   });
 }
 
@@ -350,11 +405,18 @@ let Game = {
     blink: false,
     ts: Date.now(),
   },
-  playerUnits: [
-    { x: 0, y: 0, active: false, type: undefined },
-    { x: 0, y: 0, active: false, type: undefined },
-    { x: 0, y: 0, active: false, type: undefined },
-  ],
+  playerUnits: {
+    seeker: [
+      { x: 0, y: 0, active: false, type: "seeker", inQue: false },
+      { x: 0, y: 0, active: false, type: "seeker", inQue: false },
+      { x: 0, y: 0, active: false, type: "seeker", inQue: false },
+    ],
+    mine: [
+      { x: 0, y: 0, active: false, type: "mine" },
+      { x: 0, y: 0, active: false, type: "mine" },
+      { x: 0, y: 0, active: false, type: "mine" },
+    ],
+  },
   playerFlag: {
     img: new Image(),
     x: 0,
@@ -373,13 +435,14 @@ let Game = {
     x: 0,
     y: 0,
   },
-};
-
-let trajectory = {
-  x1: 0,
-  x2: 0,
-  y1: 0,
-  y2: 0,
+  playerUnitTypeLimit: 2,
+  playerUnitLimit: 3,
+  trajectory: {
+    x1: 0,
+    x2: 0,
+    y1: 0,
+    y2: 0,
+  },
 };
 
 export {
@@ -387,12 +450,13 @@ export {
   directional,
   seekingMine,
   activateSeekingMine,
+  flagSeeker,
+  activateFlagSeeker,
   showBoundry,
   boundryLine,
   playerGoal,
   playerFlag,
   opponentGoal,
   opponentFlag,
-  flagSeeker,
   init,
 };

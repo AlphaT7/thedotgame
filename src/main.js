@@ -124,6 +124,7 @@ function inputrelease(e) {
   pointer.press = false;
   swipeHorizontal(e);
   swipeVertical(e);
+  Shapes.activateFlagSeeker();
 }
 
 function getEventCoordinates(e) {
@@ -197,7 +198,7 @@ function animationRender() {
 
   Shapes.showBoundry(pointer.outofbounds);
 
-  Shapes.flagSeeker(pointer.end);
+  Shapes.flagSeeker(pointer.x, pointer.y);
 }
 
 /* GLOBAL VARIABLES */
@@ -229,7 +230,6 @@ let pointer = {
   start: Date.now(),
   end: Date.now(),
   press: false,
-  pressEnd: Date.now(),
   outofbounds: false,
   vibrate: () => {
     if (pointer.active && pointer.activeTicks >= 59) {

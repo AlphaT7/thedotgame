@@ -203,17 +203,25 @@ header #title {
 
 .colorCanvas {
   border: 1px solid rgba(128, 232, 221, 1);
-  animation: flare 1.55s ease;
+  animation: flare 2.15s ease;
   background: #2b2d2f;
 }
 
 @keyframes flare {
   from {
-    background: rgba(255, 255, 255, 1);
+    background: rgba(128, 232, 221, .25);
   }
 
-  20% {
-    background: rgba(128, 232, 221, 0.25);
+  10% {
+    background: rgba(128, 232, 221, .45);
+  }
+
+  15% {
+    background: rgba(255, 255, 255, .65);
+  }
+
+  25% {
+    background: rgba(128, 232, 221, .35);
   }
 
   to {

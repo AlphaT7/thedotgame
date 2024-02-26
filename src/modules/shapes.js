@@ -130,10 +130,10 @@ function drawDirectional(centerX, centerY, shiftedX, shiftedY) {
     y: Math.abs(centerY) - Math.abs(shiftedY),
   };
 
-  let x1 = shiftedX + r.x * 3;
-  let y1 = shiftedY + r.y * 3;
-  let x2 = shiftedX;
-  let y2 = shiftedY;
+  let x1 = shiftedX;
+  let y1 = shiftedY;
+  let x2 = shiftedX + r.x * 3;
+  let y2 = shiftedY + r.y * 3;
 
   ctx.beginPath();
   ctx.moveTo(x1, y1);
@@ -325,6 +325,9 @@ function flagSeeker() {
   Game.playerUnits.seeker.forEach((unit) => {
     if (unit.active && unit.type == "seeker") {
       drawFlagSeeker(unit);
+      unit.trajectory.forEach((point) => {
+        drawFlagSeeker(point);
+      });
     }
   });
 }
@@ -337,10 +340,13 @@ function seekerPreLaunch() {
     playerUnitCount() < Game.playerUnitLimit &&
     seekerCount < Game.playerUnitTypeLimit;
 
+  let equation = "straight";
+
   if (underLimit) {
     let newSeeker = Game.playerUnits.seeker.filter((unit) => !unit.active)[0];
     newSeeker.inQue = true;
     newSeeker.type = "seeker";
+    newSeeker.equation = equation;
   }
 }
 
@@ -358,7 +364,12 @@ function activateFlagSeeker() {
     let newSeeker = Game.playerUnits.seeker.filter(
       (unit) => !unit.active && unit.inQue
     )[0];
-
+    newSeeker.trajectory = gameObj.seekerEquations[newSeeker.equation]({
+      x1: Game.trajectory.x1,
+      y1: Game.trajectory.y1,
+      x2: Game.trajectory.x2,
+      y2: Game.trajectory.y2,
+    });
     newSeeker.x = Game.trajectory.x2;
     newSeeker.y = Game.trajectory.y2;
     newSeeker.active = true;
@@ -400,6 +411,39 @@ function seekingMine() {
   });
 }
 
+let gameObj = {
+  seekerObj: {
+    x: 0,
+    y: 0,
+    active: false,
+    type: "seeker",
+    inQue: false,
+    equation: "",
+    trajectory: [],
+  },
+  mineObj: { x: 0, y: 0, active: false, type: "mine" },
+  seekerEquations: {
+    straight: (point) => {
+      let pointInterval = 20;
+      let trajectoryArray = [{ x: point.x2, y: point.y2 }];
+      let m = (point.y2 - point.y1) / (point.x2 - point.x1);
+      let trajectoryDistance = Math.sqrt(
+        (point.x2 - point.x1) ** 2 + (point.y2 - point.y1) ** 2
+      );
+      let pointCount = Math.floor(trajectoryDistance / pointInterval);
+      let distanceX = (point.x2 - point.x1) / pointCount;
+
+      for (let i = 1; i < pointCount; i++) {
+        let x = point.x1 + i * distanceX;
+        let y = point.y1 + i * m * distanceX;
+        trajectoryArray.push({ x, y });
+      }
+      log(trajectoryArray);
+      return trajectoryArray;
+    },
+  },
+};
+
 let Game = {
   mineBlink: {
     blink: false,
@@ -407,14 +451,14 @@ let Game = {
   },
   playerUnits: {
     seeker: [
-      { x: 0, y: 0, active: false, type: "seeker", inQue: false },
-      { x: 0, y: 0, active: false, type: "seeker", inQue: false },
-      { x: 0, y: 0, active: false, type: "seeker", inQue: false },
+      Object.create(gameObj.seekerObj),
+      Object.create(gameObj.seekerObj),
+      Object.create(gameObj.seekerObj),
     ],
     mine: [
-      { x: 0, y: 0, active: false, type: "mine" },
-      { x: 0, y: 0, active: false, type: "mine" },
-      { x: 0, y: 0, active: false, type: "mine" },
+      Object.create(gameObj.mineObj),
+      Object.create(gameObj.mineObj),
+      Object.create(gameObj.mineObj),
     ],
   },
   playerFlag: {

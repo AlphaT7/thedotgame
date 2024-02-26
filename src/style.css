@@ -11,6 +11,7 @@ body {
   -webkit-user-select: none;
   user-select: none;
   overscroll-behavior: contain;
+  overflow: hidden;
 }
 
 :root {
@@ -201,6 +202,28 @@ header #title {
   opacity: 1 !important;
 }
 
+.btnFlash {
+  animation: flash .5s ease;
+}
+
+@keyframes flash {
+  from {
+    background: rgba(128, 232, 221, .25);
+  }
+
+  10% {
+    background: rgba(128, 232, 221, .55);
+  }
+
+  15% {
+    background: rgba(128, 232, 221, 1);
+  }
+
+  to {
+    background: rgba(128, 232, 221, .25);
+  }
+}
+
 .colorCanvas {
   border: 1px solid rgba(128, 232, 221, 1);
   animation: flare 2.15s ease;
@@ -236,11 +259,58 @@ header #title {
   position: relative;
   left: 0;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(6, 1fr);
+  grid-template-columns: 50px repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
   grid-column-gap: 1px;
   grid-row-gap: 1px;
   touch-action: none;
+  grid-template-areas:
+    "tier btn btn btn"
+    "tier btn btn btn"
+    "tier btn btn btn"
+    "terminal terminal terminal terminal";
+}
+
+#terminalContainer {
+  grid-area: terminal;
+  background: rgba(128, 232, 221, .65) !important;
+  background: rgba(0, 0, 0, .85) !important;
+  display: block !important;
+  padding: 15px;
+}
+
+#terminal {
+  font-size: 12pt !important;
+  display: block !important;
+  border: none !important;
+  text-align: left !important;
+  background: transparent !important;
+}
+
+#terminalText {
+  margin: 0;
+  font-size: 22pt !important;
+  font-family: "Iceland";
+  color: #fff !important;
+  text-shadow: 0px 0px 7px rgba(255, 255, 255, .85);
+}
+
+.cursor {
+  margin-left: 3px;
+  border-right: 0.15em solid #fff;
+  animation: blink-caret 0.75s step-end infinite;
+}
+
+@keyframes blink-caret {
+
+  from,
+  to {
+    border-color: transparent;
+  }
+
+  50% {
+    border-color: #fff;
+  }
 }
 
 #row_wrapper {
@@ -441,6 +511,12 @@ fieldset {
   box-shadow: -8vmin 0 1.2022254106312904vmin currentColor;
 }
 
+#bounce {
+  /* writing-mode: vertical-rl; */
+  /* text-orientation: sideways; */
+  transform: scale(-1, 1);
+}
+
 /* RIPPLE EFFECT */
 
 #ripple {
@@ -466,10 +542,6 @@ fieldset {
   opacity: 1;
   border-radius: 50%;
   animation: touchripple 4s cubic-bezier(0, 0.2, 0.8, 1) infinite;
-}
-
-#ripple div:nth-child(1) {
-  /* animation-delay: -.25s; */
 }
 
 #ripple div:nth-child(2) {

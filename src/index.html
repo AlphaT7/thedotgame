@@ -62,7 +62,7 @@
                             <select title="Join a Game" id="gamelist" name="gamelist" size="2" required>
                             </select>
                         </div>
-                        <div class="button ice">Join Game</div>
+                        <div id="joinSelectedGame" class="button ice">Join Game</div>
                     </form>
                 </fieldset>
 
@@ -75,24 +75,27 @@
         </section>
 
         <section id="buttons_wrapper">
-            <div class="material">rotate_90_degrees_cw</div>
-            <div class="material">pen_size_1</div>
-            <div class="material">rotate_90_degrees_ccw</div>
-            <div class="material">unknown_5</div>
-            <div class="material">shield</div>
-            <div class="material">resize</div>
-            <div class="material">stylus_laser_pointer</div>
-            <div class="material">data_saver_on</div>
-            <div class="material">expand_content</div>
-            <div class="material"></div>
-            <div class="material"></div>
-            <div class="material"></div>
-            <div class="material"></div>
-            <div class="material"></div>
-            <div class="material"></div>
-            <div class="material"></div>
-            <div class="material"></div>
-            <div class="material"></div>
+            <div>1</div>
+            <div id="bounce" class="material action_btn">stylus_laser_pointer</div>
+            <div id="manualPathing" class="material action_btn">share</div>
+            <div id="spaceShift" class="material action_btn">resize</div>
+
+            <div>2</div>
+            <div id="movableMines" class="material action_btn">unknown_5</div>
+            <div id="additionalUnit" class="material action_btn">data_saver_on</div>
+            <div id="expandRadius" class="material action_btn">open_in_full</div>
+
+            <div>3</div>
+            <div id="flagSeekerShield" class="material action_btn">shield</div>
+            <div id="radarPulse" class="material action_btn">track_changes</div>
+            <div id="speed" class="material action_btn">electric_bolt</div>
+
+            <div id="terminalContainer">
+                <div id="terminal">
+                    <span id="terminalText"></span>
+                    <span class="cursor"></span>
+                </div>
+            </div>
         </section>
 
     </section>

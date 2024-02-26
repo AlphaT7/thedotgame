@@ -1,5 +1,6 @@
 /* MODULE IMPORTS */
 // import { io } from "socket.io-client";
+import { Howl, Howler } from "howler";
 import * as Shapes from "./modules/shapes.js";
 
 /* FUNCTIONS */
@@ -67,6 +68,7 @@ function swipeHorizontal(e) {
 
   if (swipeLeft) {
     panel.classList.add("showPanel");
+    sound.transition2.play();
   }
 
   if (swipeRight) {
@@ -91,9 +93,12 @@ function swipeVertical(e) {
 
   if (swipeUp) {
     panel.classList.add("showButtons");
+    typing = false;
+    sound.transition1.play();
   }
 
   if (swipeDown) {
+    typing = true;
     panel.classList.remove("showButtons");
   }
 }
@@ -177,6 +182,45 @@ function animationUpdate() {
   }
 }
 
+async function typeIt(elId, type) {
+  if (typing) return;
+  typing = true;
+  let text = {
+    bounce: "This option enables the Flag Seeker to bounce off the walls.",
+    manualPathing:
+      "This option enables you to manually draw the Flag Seeker path.",
+    speed: "This option adds a speed boost to the Flag Seeker.",
+    spaceShift: "This option enables the Flag Seeker to go through walls.",
+    movableMines:
+      "This option enables the removal and re-placement of a Seeking Mine.",
+    additionalUnit:
+      "This option increases the total number of units allowed from 3 to 4.",
+    expandRadius:
+      "This option increases the trigger radius of your Seeking Mines by 100%.",
+    flagSeekerShield:
+      "This option makes your Flag Seekers immune to the first Seeking Mine they trigger.",
+    radarPulse:
+      "This options makes your opponents Seeking Mines visible to you.",
+  };
+
+  $("#" + elId).innerHTML = "";
+  await sleep(50);
+  typing = false;
+
+  for (let char of text[type]) {
+    log(typing);
+    if (typing) break;
+    let time = Math.floor(Math.random() * (65 - 16 + 1)) + 16;
+    sound.typing.play();
+    $("#" + elId).innerHTML += char;
+    await sleep(time);
+  }
+}
+
+async function sleep(time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
 function animationRender() {
   Shapes.boundryLine();
 
@@ -207,10 +251,10 @@ const $ = document.querySelector.bind(document);
 const log = console.log.bind(console);
 const canvas = $("#canvas");
 const ctx = canvas.getContext("2d");
-const regex =
-  /Mobi|Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+// const regex =
+//   /Mobi|Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
 
-const isMobile = regex.test(navigator.userAgent);
+// const isMobile = regex.test(navigator.userAgent);
 
 //  window.location.protocol + "//" + window.location.hostname + ":3000";
 
@@ -240,6 +284,12 @@ let pointer = {
     }
   },
 };
+
+let sound = {
+  start: new Object(),
+};
+
+let typing = false;
 
 const animationLoop = {
   lastTick: performance.now(),
@@ -352,23 +402,96 @@ $("#buttons_wrapper").addEventListener("pointerup", (e) => {
   inputrelease(e);
 });
 
+document.querySelectorAll(".action_btn").forEach((el) => {
+  el.addEventListener("pointerup", (e) => {
+    e.target.classList.add("btnFlash");
+    setTimeout(() => {
+      e.target.classList.remove("btnFlash");
+    }, 700);
+  });
+});
+
 /* BUTTONS */
 
 $("#submitGameName").addEventListener("click", (e) => {
+  sound.button.play();
   let formData = new FormData($("#creategame"));
   socket.emit("newgame", formData.get("gamename"));
 });
 
 $("#ripple").addEventListener("click", async (e) => {
+  sound.start = new Howl({
+    src: ["./sound/load.wav"],
+    volume: 0.5,
+  });
+
   $("#ripple").classList.add("hideripple");
   setTimeout(() => {
     $("#ripple").style.display = "none";
   }, 1100);
   await Shapes.init();
   animationLoop.start();
+  sound.start.play();
+
+  sound.transition1 = new Howl({
+    src: ["./sound/transition1.wav"],
+    volume: 0.25,
+  });
+  sound.transition2 = new Howl({
+    src: ["./sound/transition2.mp3"],
+    volume: 1,
+  });
+  sound.button = new Howl({
+    src: ["./sound/button.wav"],
+    volume: 1,
+  });
+  sound.typing = new Howl({
+    src: ["./sound/typeEffect.mp3"],
+    volume: 1,
+  });
 });
 
 $("#joingame").addEventListener("submit", (e) => {
   let formData = new FormData($("#joingame"));
   socket.emit("joingame", formData.get("gamelist"));
+});
+
+$("#joinSelectedGame").addEventListener("pointerup", () => {
+  sound.button.play();
+});
+
+$("#bounce").addEventListener("pointerup", (e) => {
+  typeIt("terminalText", e.target.id);
+});
+
+$("#speed").addEventListener("pointerup", (e) => {
+  typeIt("terminalText", e.target.id);
+});
+
+$("#spaceShift").addEventListener("pointerup", (e) => {
+  typeIt("terminalText", e.target.id);
+});
+
+$("#movableMines").addEventListener("pointerup", (e) => {
+  typeIt("terminalText", e.target.id);
+});
+
+$("#additionalUnit").addEventListener("pointerup", (e) => {
+  typeIt("terminalText", e.target.id);
+});
+
+$("#expandRadius").addEventListener("pointerup", (e) => {
+  typeIt("terminalText", e.target.id);
+});
+
+$("#flagSeekerShield").addEventListener("pointerup", (e) => {
+  typeIt("terminalText", e.target.id);
+});
+
+$("#radarPulse").addEventListener("pointerup", (e) => {
+  typeIt("terminalText", e.target.id);
+});
+
+$("#manualPathing").addEventListener("pointerup", (e) => {
+  typeIt("terminalText", e.target.id);
 });

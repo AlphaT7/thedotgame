@@ -75,20 +75,69 @@
         </section>
 
         <section id="buttons_wrapper">
-            <div>1</div>
-            <div id="bounce" class="material action_btn">stylus_laser_pointer</div>
-            <div id="manualPathing" class="material action_btn">share</div>
-            <div id="spaceShift" class="material action_btn">resize</div>
+            <div class="tier">1</div>
+            <div class="tierWrapper">
+                <label id="bounce" class="material action_btn">
+                    stylus_laser_pointer
+                    <input id="option1.1" type="radio" name="tier1" value="bounce">
+                </label>
+                <label id="manualPathing" class="material action_btn">
+                    share
+                    <input id="option1.2" type="radio" name="tier1" value="manual">
+                </label>
+                <label id="spaceShift" class="material action_btn">
+                    resize
+                    <input id="option1.3" type="radio" name="tier1" value="shift">
+                </label>
+            </div>
 
-            <div>2</div>
-            <div id="movableMines" class="material action_btn">unknown_5</div>
-            <div id="additionalUnit" class="material action_btn">data_saver_on</div>
-            <div id="expandRadius" class="material action_btn">open_in_full</div>
+            <div class="tier">2</div>
+            <div class="tierWrapper">
+                <label id="movableMines" class="material action_btn">
+                    unknown_5
+                    <input id="option2.1" type="radio" name="tier2" value="movable">
+                </label>
+                <label id="additionalUnit" class="material action_btn">
+                    data_saver_on
+                    <input id="option2.2" type="radio" name="tier2" value="additional">
+                </label>
+                <label id="expandRadius" class="material action_btn">
+                    open_in_full
+                    <input id="option2.3" type="radio" name="tier2" value="expand">
+                </label>
+            </div>
 
-            <div>3</div>
-            <div id="flagSeekerShield" class="material action_btn">shield</div>
-            <div id="radarPulse" class="material action_btn">track_changes</div>
-            <div id="speed" class="material action_btn">electric_bolt</div>
+            <div class="tier">3</div>
+            <div class="tierWrapper">
+                <label id="flagSeekerShield" class="material action_btn">
+                    shield
+                    <input id="option3.1" type="radio" name="tier3" value="shield">
+                </label>
+                <label id="deployTimeReduction" class="material action_btn">
+                    acute
+                    <input id="option3.2" type="radio" name="tier3" value="time">
+                </label>
+                <label id="speed" class="material action_btn">
+                    electric_bolt
+                    <input id="option3.3" type="radio" name="tier3" value="speed">
+                </label>
+            </div>
+
+            <div class="tier">4</div>
+            <div class="tierWrapper">
+                <label id="flagDecoy" class="material action_btn">
+                    flag_circle
+                    <input id="option4.1" type="radio" name="tier4" value="decoy">
+                </label>
+                <label id="invisibleFlagSeekers" class="material action_btn">
+                    visibility_off
+                    <input id="option4.2" type="radio" name="tier4" value="invisibility">
+                </label>
+                <label id="radarPulse" class="material action_btn">
+                    track_changes
+                    <input id="option4.3" type="radio" name="tier4" value="radar">
+                </label>
+            </div>
 
             <div id="terminalContainer">
                 <div id="terminal">
@@ -97,7 +146,6 @@
                 </div>
             </div>
         </section>
-
     </section>
 
     <div id="ripple" class="showRipple">

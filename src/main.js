@@ -76,7 +76,7 @@ function swipeHorizontal(e) {
   }
 }
 
-function swipeVertical(e) {
+async function swipeVertical(e) {
   let coordinates = getEventCoordinates(e);
   let panel = $("#row_wrapper");
   let swipeUp =
@@ -92,13 +92,16 @@ function swipeVertical(e) {
     !$("#game_wrapper").classList.contains("showPanel");
 
   if (swipeUp) {
+    enableTyping = true;
     panel.classList.add("showButtons");
-    typing = false;
     sound.transition1.play();
   }
 
   if (swipeDown) {
-    typing = true;
+    enableTyping = false;
+    await sleep(70);
+    enableTyping = false;
+    $("#terminalText").innerHTML = "";
     panel.classList.remove("showButtons");
   }
 }
@@ -123,13 +126,17 @@ function inputstart(e) {
 
 function inputrelease(e) {
   if (e.target == $("#canvas")) doubleTap();
+  if (pointer.press && pointer.activeTicks >= 59)
+    Shapes.activateFlagSeeker(pointer.path);
+  if (!pointer.press) {
+    swipeHorizontal(e);
+    swipeVertical(e);
+  }
   pointer.active = false;
   pointer.outofbounds = false;
   pointer.end = Date.now();
   pointer.press = false;
-  swipeHorizontal(e);
-  swipeVertical(e);
-  Shapes.activateFlagSeeker();
+  pointer.path = [];
 }
 
 function getEventCoordinates(e) {
@@ -150,6 +157,13 @@ function shiftCoordinates(e) {
   let rect = $("#canvas").getBoundingClientRect();
   pointer.shiftedX = e.clientX - rect.left;
   pointer.shiftedY = e.clientY - rect.top;
+}
+
+function manualPath(e) {
+  if (pointer.press && pointer.activeTicks >= 59) {
+    let el = canvas.getBoundingClientRect();
+    pointer.path.push({ x: e.clientX - el.left, y: e.clientY - el.top });
+  }
 }
 
 function animationUpdate() {
@@ -183,33 +197,34 @@ function animationUpdate() {
 }
 
 async function typeIt(elId, type) {
-  if (typing) return;
-  typing = true;
+  if (!enableTyping) return;
+  enableTyping = false;
   let text = {
-    bounce: "This option enables the Flag Seeker to bounce off the walls.",
-    manualPathing:
-      "This option enables you to manually draw the Flag Seeker path.",
-    speed: "This option adds a speed boost to the Flag Seeker.",
-    spaceShift: "This option enables the Flag Seeker to go through walls.",
-    movableMines:
-      "This option enables the removal and re-placement of a Seeking Mine.",
+    bounce: "Your Flag-Seekers can bounce off the sides of the screen.",
+    manualPathing: "Manually draw your Flag-Seekers path.",
+    speed: "Add a speed boost to your Flag-Seekers.",
+    spaceShift:
+      "Your Flag-Seekers can teleport through the sides of the screen.",
+    movableMines: "Enable the removal and re-placement of your Seeking-Mines.",
     additionalUnit:
-      "This option increases the total number of units allowed from 3 to 4.",
-    expandRadius:
-      "This option increases the trigger radius of your Seeking Mines by 100%.",
+      "Increase your total number of units available from 3 to 4.",
+    expandRadius: "Increase the trigger radius of your Seeking-Mines by 100%.",
     flagSeekerShield:
-      "This option makes your Flag Seekers immune to the first Seeking Mine they trigger.",
-    radarPulse:
-      "This options makes your opponents Seeking Mines visible to you.",
+      "Your Flag-Seekers become immune to the first Seeking-Mine they trigger.",
+    radarPulse: "Your opponents Seeking-Mines are now visible to you.",
+    deployTimeReduction:
+      "Decrease the deploy time of your Flag-Seekers from a to b.",
+    flagDecoy: "Deploy Decoy-Flags to distract the Flag Seekers.",
+    invisibleFlagSeekers:
+      "Your Flag-Seekers are invisible to your opponent until they reach the flag.",
   };
 
   $("#" + elId).innerHTML = "";
   await sleep(50);
-  typing = false;
-
+  enableTyping = true;
+  await sleep(70);
   for (let char of text[type]) {
-    log(typing);
-    if (typing) break;
+    if (!enableTyping) break;
     let time = Math.floor(Math.random() * (65 - 16 + 1)) + 16;
     sound.typing.play();
     $("#" + elId).innerHTML += char;
@@ -283,13 +298,20 @@ let pointer = {
       }
     }
   },
+  path: [],
 };
 
 let sound = {
   start: new Object(),
 };
 
-let typing = false;
+let enableTyping = false;
+let talentTier = {
+  t1: "",
+  t2: "",
+  t3: "",
+  t4: "",
+};
 
 const animationLoop = {
   lastTick: performance.now(),
@@ -376,6 +398,7 @@ $("#canvas").addEventListener("pointerup", (e) => {
 });
 
 $("#canvas").addEventListener("pointermove", (e) => {
+  manualPath(e);
   shiftCoordinates(e);
 });
 
@@ -460,38 +483,18 @@ $("#joinSelectedGame").addEventListener("pointerup", () => {
   sound.button.play();
 });
 
-$("#bounce").addEventListener("pointerup", (e) => {
-  typeIt("terminalText", e.target.id);
+document.querySelectorAll(".action_btn").forEach((el) => {
+  el.addEventListener("pointerup", (e) => {
+    typeIt("terminalText", e.target.id);
+  });
 });
 
-$("#speed").addEventListener("pointerup", (e) => {
-  typeIt("terminalText", e.target.id);
-});
-
-$("#spaceShift").addEventListener("pointerup", (e) => {
-  typeIt("terminalText", e.target.id);
-});
-
-$("#movableMines").addEventListener("pointerup", (e) => {
-  typeIt("terminalText", e.target.id);
-});
-
-$("#additionalUnit").addEventListener("pointerup", (e) => {
-  typeIt("terminalText", e.target.id);
-});
-
-$("#expandRadius").addEventListener("pointerup", (e) => {
-  typeIt("terminalText", e.target.id);
-});
-
-$("#flagSeekerShield").addEventListener("pointerup", (e) => {
-  typeIt("terminalText", e.target.id);
-});
-
-$("#radarPulse").addEventListener("pointerup", (e) => {
-  typeIt("terminalText", e.target.id);
-});
-
-$("#manualPathing").addEventListener("pointerup", (e) => {
-  typeIt("terminalText", e.target.id);
-});
+for (let i = 1; i <= 4; i++) {
+  document.getElementsByName("tier" + i).forEach((el) => {
+    el.addEventListener("change", (e) => {
+      // add event listeners to each of the radio buttons for the talent tiers
+      // on "change", update the Shapes.talent object properties.
+      Shapes.talent["t" + i] = e.target.value;
+    });
+  });
+}

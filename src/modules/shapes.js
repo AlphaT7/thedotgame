@@ -7,6 +7,7 @@ async function displayCanvas() {
   let sleep = async (delay) =>
     new Promise((resolve) => setTimeout(resolve, delay));
   let maxW = 372;
+  // let maxH = 551; //iphone 6s chrome height
   let maxH = 622;
 
   let expandW = async () => {
@@ -139,7 +140,7 @@ function drawDirectional(centerX, centerY, shiftedX, shiftedY) {
   ctx.moveTo(x1, y1);
   ctx.lineTo(x2, y2);
   ctx.stroke();
-  Game.trajectory = { x1: x1, y1: y1, x2: x2, y2: y2 };
+  Game.directional = { x1: x1, y1: y1, x2: x2, y2: y2 };
 }
 
 function drawSeekingMine(centerX, centerY) {
@@ -324,7 +325,6 @@ function drawFlagSeeker(unit) {
 function flagSeeker() {
   Game.playerUnits.seeker.forEach((unit) => {
     if (unit.active && unit.type == "seeker") {
-      drawFlagSeeker(unit);
       unit.trajectory.forEach((point) => {
         drawFlagSeeker(point);
       });
@@ -332,7 +332,7 @@ function flagSeeker() {
   });
 }
 
-function seekerPreLaunch() {
+function reserveSeekerUnit() {
   let seekerCount = Game.playerUnits.seeker.filter(
     (unit) => unit.active
   ).length;
@@ -340,17 +340,19 @@ function seekerPreLaunch() {
     playerUnitCount() < Game.playerUnitLimit &&
     seekerCount < Game.playerUnitTypeLimit;
 
-  let equation = "straight";
+  let isTalentSet = Game.talent.t1 != "";
 
-  if (underLimit) {
+  if (underLimit && isTalentSet) {
+    // select the 1st inactive unit and place it in que
     let newSeeker = Game.playerUnits.seeker.filter((unit) => !unit.active)[0];
     newSeeker.inQue = true;
     newSeeker.type = "seeker";
-    newSeeker.equation = equation;
+    newSeeker.equation = Game.talent.t1;
   }
 }
 
-function activateFlagSeeker() {
+function activateFlagSeeker(pointerPath) {
+  reserveSeekerUnit();
   let seekerCount = Game.playerUnits.seeker.filter(
     (unit) => unit.active
   ).length;
@@ -364,14 +366,20 @@ function activateFlagSeeker() {
     let newSeeker = Game.playerUnits.seeker.filter(
       (unit) => !unit.active && unit.inQue
     )[0];
-    newSeeker.trajectory = gameObj.seekerEquations[newSeeker.equation]({
-      x1: Game.trajectory.x1,
-      y1: Game.trajectory.y1,
-      x2: Game.trajectory.x2,
-      y2: Game.trajectory.y2,
-    });
-    newSeeker.x = Game.trajectory.x2;
-    newSeeker.y = Game.trajectory.y2;
+
+    let pathPoints =
+      newSeeker.equation != "manual" ? Game.directional : pointerPath;
+
+    newSeeker.trajectory =
+      gameObj.seekerEquations[newSeeker.equation](pathPoints);
+    newSeeker.x =
+      newSeeker.equation != "manual"
+        ? Game.directional.x2
+        : newSeeker.trajectory[0].x;
+    newSeeker.y =
+      newSeeker.equation != "manual"
+        ? Game.directional.y2
+        : newSeeker.trajectory[0].y;
     newSeeker.active = true;
     newSeeker.type = "seeker";
     newSeeker.inQue = false;
@@ -387,13 +395,15 @@ function directional(pointer) {
   let inputChanged =
     Math.abs(pointer.y - pointer.shiftedY) > 55 ||
     Math.abs(pointer.x - pointer.shiftedX) > 55;
+  let needsDirectional =
+    Game.talent.t1 == "bounce" || Game.talent.t1 == "shift" ? true : false;
   if (
     inputChanged &&
     !pointer.outofbounds &&
     pointer.active &&
-    pointer.activeTicks >= 59
+    pointer.activeTicks >= 59 &&
+    needsDirectional
   ) {
-    if (!Game.playerUnits.seeker.some((unit) => unit.inQue)) seekerPreLaunch();
     drawDirectional(pointer.x, pointer.y, pointer.shiftedX, pointer.shiftedY);
   }
 }
@@ -423,7 +433,7 @@ let gameObj = {
   },
   mineObj: { x: 0, y: 0, active: false, type: "mine" },
   seekerEquations: {
-    straight: (point) => {
+    bounce: (point) => {
       let pointInterval = 20;
       let trajectoryArray = [{ x: point.x2, y: point.y2 }];
       let m = (point.y2 - point.y1) / (point.x2 - point.x1);
@@ -438,13 +448,24 @@ let gameObj = {
         let y = point.y1 + i * m * distanceX;
         trajectoryArray.push({ x, y });
       }
-      log(trajectoryArray);
+
       return trajectoryArray;
+    },
+    manual: (pathPoints) => {
+      let newPathPoints = pathPoints.filter((pathPoint, i) => i % 20 == 0);
+      newPathPoints.push(pathPoints.at(-1));
+      return newPathPoints;
     },
   },
 };
 
 let Game = {
+  talent: {
+    t1: "",
+    t2: "",
+    t3: "",
+    t4: "",
+  },
   mineBlink: {
     blink: false,
     ts: Date.now(),
@@ -481,12 +502,7 @@ let Game = {
   },
   playerUnitTypeLimit: 2,
   playerUnitLimit: 3,
-  trajectory: {
-    x1: 0,
-    x2: 0,
-    y1: 0,
-    y2: 0,
-  },
+  directional: {},
 };
 
 export {
@@ -504,3 +520,5 @@ export {
   opponentFlag,
   init,
 };
+
+export let talent = Game.talent;

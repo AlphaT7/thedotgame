@@ -125,22 +125,58 @@ function radiusTicks(ticks, cx, cy) {
   return radianCircle;
 }
 
+function calculateAngle(anchor, point) {
+  return (
+    (Math.atan2(anchor.y - point.y, anchor.x - point.x) * 180) / Math.PI + 180
+  );
+}
+
 function drawDirectional(centerX, centerY, shiftedX, shiftedY) {
   let r = {
     x: Math.abs(centerX) - Math.abs(shiftedX),
     y: Math.abs(centerY) - Math.abs(shiftedY),
   };
+  // centerY,centerY is the focal point that the line pivots on; the center of the circle;
+  // x1,y1 is the point where the mouse is currently at
+  // x2,y2 is the point at the opposite end of x1,y1;
+  // midX,midY is the point where X is either intercepting 0 or canvas.width;
+  // x3,y3 is the point at the end of the 2nd line after distance and angle refraction has been calculated
 
   let x1 = shiftedX;
   let y1 = shiftedY;
   let x2 = shiftedX + r.x * 3;
   let y2 = shiftedY + r.y * 3;
 
-  ctx.beginPath();
-  ctx.moveTo(x1, y1);
-  ctx.lineTo(x2, y2);
-  ctx.stroke();
-  Game.directional = { x1: x1, y1: y1, x2: x2, y2: y2 };
+  let offScreen = isOffScreen(x2, y2);
+  let angle = calculateAngle(
+    { x: centerX, y: centerY },
+    { x: shiftedX, y: shiftedY }
+  );
+
+  if (!offScreen) {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    Game.directional = { x1: x1, y1: y1, x2: x2, y2: y2 };
+  } else {
+    //calculated the point2 angle, need to subtract the angle from 360 to get the 2nd line angle
+    let refractedAngle = 360 - angle;
+    let m = (y2 - y1) / (x2 - x1);
+    let midX = x2 < 0 ? 0 : canvas.width;
+    let midY = m * (midX - centerX) + centerY;
+    let d = calculateDistance({ x1: midX, y1: midY, x2: x2, y2: y2 });
+    let angleInRadians = refractedAngle * (Math.PI / 180);
+    let x3 = midX + d * Math.cos(angleInRadians);
+    let y3 = midY + d * Math.sin(angleInRadians);
+
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(midX, midY);
+    ctx.lineTo(x3, y3);
+    ctx.stroke();
+    Game.directional = { x1: x1, y1: y1, x2: midX, y2: midY, x3, y3 };
+  }
 }
 
 function drawSeekingMine(centerX, centerY) {
@@ -421,6 +457,15 @@ function seekingMine() {
   });
 }
 
+function isOffScreen(x, y) {
+  let boundry = { xL: 0, yT: 0, xR: canvas.width, yB: canvas.height };
+  return x < boundry.xL || x > boundry.xR || y < boundry.yT || y > boundry.yB;
+}
+
+function calculateDistance(point) {
+  return Math.sqrt((point.x2 - point.x1) ** 2 + (point.y2 - point.y1) ** 2);
+}
+
 let gameObj = {
   seekerObj: {
     x: 0,
@@ -437,9 +482,56 @@ let gameObj = {
       let pointInterval = 20;
       let trajectoryArray = [{ x: point.x2, y: point.y2 }];
       let m = (point.y2 - point.y1) / (point.x2 - point.x1);
-      let trajectoryDistance = Math.sqrt(
-        (point.x2 - point.x1) ** 2 + (point.y2 - point.y1) ** 2
-      );
+      let trajectoryDistance = calculateDistance(point);
+      let pointCount = Math.floor(trajectoryDistance / pointInterval);
+      let distanceX = (point.x2 - point.x1) / pointCount;
+
+      for (let i = 1; i < pointCount; i++) {
+        let x = point.x1 + i * distanceX;
+        let y = point.y1 + i * m * distanceX;
+        trajectoryArray.push({ x, y });
+      }
+
+      if (Object.hasOwn(Game.directional, "x3")) {
+        // if property x3 has been set...
+        let m = (point.y2 - point.y3) / (point.x2 - point.x3);
+        let trajectoryDistance = calculateDistance({
+          x1: point.x2,
+          y1: point.y2,
+          x2: point.x3,
+          y2: point.y3,
+        });
+        let pointCount = Math.floor(trajectoryDistance / pointInterval);
+        let distanceX = (point.x3 - point.x2) / pointCount;
+
+        for (let i = 1; i < pointCount; i++) {
+          let x = point.x2 + i * distanceX;
+          let y = point.y2 + i * m * distanceX;
+          trajectoryArray.push({ x, y });
+        }
+      }
+
+      // let breakpoint = trajectoryArray.find((point) => {
+      //   return isOffScreen(point.x, point.y);
+      // });
+
+      // // breakpoint finds the break point in the line where it goes off screen;
+      // // need to remove the offscreen points on the line, and recreate them onscreen at an angle.
+      // log(breakpoint);
+      // if (!breakpoint) log("!breakpoint");
+
+      return trajectoryArray;
+    },
+    manual: (pathPoints) => {
+      let newPathPoints = pathPoints.filter((pathPoint, i) => i % 5 == 0);
+      newPathPoints.push(pathPoints.at(-1));
+      return newPathPoints;
+    },
+    shift: (point) => {
+      let pointInterval = 20;
+      let trajectoryArray = [{ x: point.x2, y: point.y2 }];
+      let m = (point.y2 - point.y1) / (point.x2 - point.x1);
+      let trajectoryDistance = calculateDistance(point);
       let pointCount = Math.floor(trajectoryDistance / pointInterval);
       let distanceX = (point.x2 - point.x1) / pointCount;
 
@@ -450,11 +542,6 @@ let gameObj = {
       }
 
       return trajectoryArray;
-    },
-    manual: (pathPoints) => {
-      let newPathPoints = pathPoints.filter((pathPoint, i) => i % 20 == 0);
-      newPathPoints.push(pathPoints.at(-1));
-      return newPathPoints;
     },
   },
 };

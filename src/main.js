@@ -200,7 +200,8 @@ async function typeIt(elId, type) {
   if (!enableTyping) return;
   enableTyping = false;
   let text = {
-    bounce: "Your Flag-Seekers can bounce off the sides of the screen.",
+    bounce:
+      "Your Flag-Seekers can bounce one time off either side of the screen.",
     manualPathing: "Manually draw your Flag-Seekers path.",
     speed: "Add a speed boost to your Flag-Seekers.",
     spaceShift:

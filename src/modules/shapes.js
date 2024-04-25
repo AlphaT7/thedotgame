@@ -131,7 +131,7 @@ function calculateAngle(anchor, point) {
   );
 }
 
-function drawDirectional(centerX, centerY, shiftedX, shiftedY) {
+function drawDirectional(centerX, centerY, shiftedX, shiftedY, path) {
   let r = {
     x: Math.abs(centerX) - Math.abs(shiftedX),
     y: Math.abs(centerY) - Math.abs(shiftedY),
@@ -148,34 +148,89 @@ function drawDirectional(centerX, centerY, shiftedX, shiftedY) {
   let y2 = shiftedY + r.y * 3;
 
   let offScreen = isOffScreen(x2, y2);
-  let angle = calculateAngle(
-    { x: centerX, y: centerY },
-    { x: shiftedX, y: shiftedY }
-  );
 
-  if (!offScreen) {
+  if (!offScreen && Game.talent.t1 != "manual") {
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
     ctx.stroke();
     Game.directional = { x1: x1, y1: y1, x2: x2, y2: y2 };
-  } else {
-    //calculated the point2 angle, need to subtract the angle from 360 to get the 2nd line angle
-    let refractedAngle = 360 - angle;
-    let m = (y2 - y1) / (x2 - x1);
-    let midX = x2 < 0 ? 0 : canvas.width;
-    let midY = m * (midX - centerX) + centerY;
-    let d = calculateDistance({ x1: midX, y1: midY, x2: x2, y2: y2 });
-    let angleInRadians = refractedAngle * (Math.PI / 180);
-    let x3 = midX + d * Math.cos(angleInRadians);
-    let y3 = midY + d * Math.sin(angleInRadians);
+    return;
+  }
 
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(midX, midY);
-    ctx.lineTo(x3, y3);
-    ctx.stroke();
-    Game.directional = { x1: x1, y1: y1, x2: midX, y2: midY, x3, y3 };
+  let angle = calculateAngle(
+    { x: centerX, y: centerY },
+    { x: shiftedX, y: shiftedY }
+  );
+
+  switch (Game.talent.t1) {
+    case "manual":
+      ctx.beginPath();
+      path.forEach((point, i) => {
+        if (!(i % 5 == 0)) return;
+        ctx.fillStyle = "#fff";
+        ctx.lineTo(point.x, point.y);
+        ctx.shadowBlur = 0;
+        ctx.stroke();
+      });
+      break;
+
+    case "bounce":
+      (() => {
+        // calculated the point2 angle, need to subtract the angle from 360 to get the 2nd line angle;
+        let reflectedAngle = 360 - angle;
+        let m = (y2 - y1) / (x2 - x1);
+        // midpoint equals either left or right side of the canvas;
+        let midX = x2 < 0 ? 0 : canvas.width;
+        let midY = m * (midX - centerX) + centerY;
+        let d = calculateDistance({ x1: midX, y1: midY, x2: x2, y2: y2 });
+        let angleInRadians = reflectedAngle * (Math.PI / 180);
+        let x3 = midX + d * Math.cos(angleInRadians);
+        let y3 = midY + d * Math.sin(angleInRadians);
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(midX, midY);
+        ctx.lineTo(x3, y3);
+        ctx.stroke();
+        Game.directional = { x1: x1, y1: y1, x2: midX, y2: midY, x3, y3 };
+      })();
+      break;
+
+    case "shift":
+      (() => {
+        let m = (y2 - y1) / (x2 - x1);
+        // midpoint equals either left or right side of the canvas;
+        let midX = x2 < 0 ? 0 : canvas.width;
+        let midY = m * (midX - centerX) + centerY;
+        // shift the coordinates to the opposite side of the canvas;
+        let x3 = midX == 0 ? canvas.width : 0;
+        let y3 = midY;
+
+        let x4 = x2 < canvas.width ? x2 + canvas.width : x2 - canvas.width;
+        let y4 = y2;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(midX, midY);
+        ctx.moveTo(x3, y3);
+        ctx.lineTo(x4, y4);
+        ctx.stroke();
+        Game.directional = {
+          x1: x1,
+          y1: y1,
+          x2: x2,
+          y2: y2,
+          x3: x3,
+          y3: y3,
+          x4: x4,
+          y4: y4,
+        };
+      })();
+      break;
+
+    default:
+      log("no t1 talent picked");
+      break;
   }
 }
 
@@ -431,16 +486,20 @@ function directional(pointer) {
   let inputChanged =
     Math.abs(pointer.y - pointer.shiftedY) > 55 ||
     Math.abs(pointer.x - pointer.shiftedX) > 55;
-  let needsDirectional =
-    Game.talent.t1 == "bounce" || Game.talent.t1 == "shift" ? true : false;
+
   if (
     inputChanged &&
     !pointer.outofbounds &&
     pointer.active &&
-    pointer.activeTicks >= 59 &&
-    needsDirectional
+    pointer.activeTicks >= 59 //&&
   ) {
-    drawDirectional(pointer.x, pointer.y, pointer.shiftedX, pointer.shiftedY);
+    drawDirectional(
+      pointer.x,
+      pointer.y,
+      pointer.shiftedX,
+      pointer.shiftedY,
+      pointer.path
+    );
   }
 }
 
@@ -492,7 +551,7 @@ let gameObj = {
         trajectoryArray.push({ x, y });
       }
 
-      if (Object.hasOwn(Game.directional, "x3")) {
+      if ("x3" in point) {
         // if property x3 has been set...
         let m = (point.y2 - point.y3) / (point.x2 - point.x3);
         let trajectoryDistance = calculateDistance({
@@ -511,19 +570,13 @@ let gameObj = {
         }
       }
 
-      // let breakpoint = trajectoryArray.find((point) => {
-      //   return isOffScreen(point.x, point.y);
-      // });
-
-      // // breakpoint finds the break point in the line where it goes off screen;
-      // // need to remove the offscreen points on the line, and recreate them onscreen at an angle.
-      // log(breakpoint);
-      // if (!breakpoint) log("!breakpoint");
-
       return trajectoryArray;
     },
     manual: (pathPoints) => {
-      let newPathPoints = pathPoints.filter((pathPoint, i) => i % 5 == 0);
+      let pointInterval = 20;
+      let newPathPoints = pathPoints.filter(
+        (pathPoint, i) => i % pointInterval == 0
+      );
       newPathPoints.push(pathPoints.at(-1));
       return newPathPoints;
     },
@@ -539,6 +592,24 @@ let gameObj = {
         let x = point.x1 + i * distanceX;
         let y = point.y1 + i * m * distanceX;
         trajectoryArray.push({ x, y });
+      }
+
+      if ("x3" in point) {
+        trajectoryArray.push({ x: point.x3, y: point.y3 });
+        let m = (point.y4 - point.y3) / (point.x4 - point.x3);
+        let trajectoryDistance = calculateDistance({
+          x1: point.x3,
+          y1: point.y3,
+          x2: point.x4,
+          y2: point.y4,
+        });
+        let pointCount = Math.floor(trajectoryDistance / pointInterval);
+        let distanceX = (point.x4 - point.x3) / pointCount;
+        for (let i = 1; i < pointCount; i++) {
+          let x = point.x3 + i * distanceX;
+          let y = point.y3 + i * m * distanceX;
+          trajectoryArray.push({ x, y });
+        }
       }
 
       return trajectoryArray;

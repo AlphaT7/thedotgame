@@ -227,8 +227,9 @@ async function typeIt(elId, type) {
   await sleep(70);
   for (let char of text[type]) {
     if (!enableTyping) break;
-    let time = Math.floor(Math.random() * (65 - 16 + 1)) + 16;
-    sound.typing.play();
+    let time = Math.floor(Math.random() * (35 - 16 + 1)) + 16;
+    // let time = 0
+    await sound.typing.play();
     $("#" + elId).innerHTML += char;
     await sleep(time);
   }

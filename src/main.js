@@ -1,6 +1,6 @@
 /* MODULE IMPORTS */
 // import { io } from "socket.io-client";
-import { Howl, Howler } from "howler";
+import Sound from "./modules/sound.js";
 import * as Shapes from "./modules/shapes.js";
 
 /* FUNCTIONS */
@@ -68,7 +68,8 @@ function swipeHorizontal(e) {
 
   if (swipeLeft) {
     panel.classList.add("showPanel");
-    sound.transition2.play();
+    sound.sidepanel.play();
+    // sound.transition2.play();
   }
 
   if (swipeRight) {
@@ -307,22 +308,20 @@ let sound = {
 };
 
 let enableTyping = false;
-let talentTier = {
-  t1: "",
-  t2: "",
-  t3: "",
-  t4: "",
-};
+// let talentTier = {
+//   t1: "",
+//   t2: "",
+//   t3: "",
+//   t4: "",
+// };
 
 const animationLoop = {
   lastTick: performance.now(),
   frame: () => {},
   start: () => {
-    // log({ start: "start" });
     animationLoop.frame = window.requestAnimationFrame(animationLoop.tick);
   },
   stop: () => {
-    // log({ stop: "stop" });
     window.cancelAnimationFrame(animationLoop.frame);
   },
   update: () => {
@@ -428,10 +427,14 @@ $("#buttons_wrapper").addEventListener("pointerup", (e) => {
 
 document.querySelectorAll(".action_btn").forEach((el) => {
   el.addEventListener("pointerup", (e) => {
-    e.target.classList.add("btnFlash");
-    setTimeout(() => {
-      e.target.classList.remove("btnFlash");
-    }, 700);
+    let timeElapsed = Date.now() - pointer.end;
+    if (timeElapsed < 300) {
+      typeIt("terminalText", e.target.id);
+      e.target.classList.add("btnFlash");
+      setTimeout(() => {
+        e.target.classList.remove("btnFlash");
+      }, 3500);
+    }
   });
 });
 
@@ -444,8 +447,8 @@ $("#submitGameName").addEventListener("click", (e) => {
 });
 
 $("#ripple").addEventListener("click", async (e) => {
-  sound.start = new Howl({
-    src: ["./sound/load.wav"],
+  sound.start = new Sound({
+    src: "./sound/load.wav",
     volume: 0.5,
   });
 
@@ -457,20 +460,24 @@ $("#ripple").addEventListener("click", async (e) => {
   animationLoop.start();
   sound.start.play();
 
-  sound.transition1 = new Howl({
-    src: ["./sound/transition1.wav"],
+  sound.transition1 = new Sound({
+    src: "./sound/transition1.wav",
     volume: 0.25,
   });
-  sound.transition2 = new Howl({
-    src: ["./sound/transition2.mp3"],
+  sound.transition2 = new Sound({
+    src: "./sound/transition2.mp3",
     volume: 1,
   });
-  sound.button = new Howl({
-    src: ["./sound/button.wav"],
+  sound.button = new Sound({
+    src: "./sound/button.wav",
     volume: 1,
   });
-  sound.typing = new Howl({
-    src: ["./sound/typeEffect.mp3"],
+  sound.typing = new Sound({
+    src: "./sound/typeEffect.mp3",
+    volume: 1,
+  });
+  sound.sidepanel = new Sound({
+    src: "./sound/sidePanel.mp3",
     volume: 1,
   });
 });
@@ -484,18 +491,14 @@ $("#joinSelectedGame").addEventListener("pointerup", () => {
   sound.button.play();
 });
 
-document.querySelectorAll(".action_btn").forEach((el) => {
-  el.addEventListener("pointerup", (e) => {
-    typeIt("terminalText", e.target.id);
-  });
-});
-
 for (let i = 1; i <= 4; i++) {
   document.getElementsByName("tier" + i).forEach((el) => {
     el.addEventListener("change", (e) => {
       // add event listeners to each of the radio buttons for the talent tiers
-      // on "change", update the Shapes.talent object properties.
-      Shapes.talent["t" + i] = e.target.value;
+      // on "change", update the Shapes.Game.talent properties.
+      Shapes.Game.talent["t" + i] = e.target.value;
+      Shapes.Game.playerUnitLimit = e.target.value == "additional" ? 4 : 3;
+      Shapes.Game.playerUnitTypeLimit = e.target.value == "additional" ? 3 : 2;
     });
   });
 }

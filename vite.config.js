@@ -1,5 +1,7 @@
-// vite.config.js
+import mkcert from "vite-plugin-mkcert";
+
 export default {
+  plugins: [mkcert()],
   root: "./src/",
   publicDir: "../public/",
   build: {
@@ -8,6 +10,7 @@ export default {
     reportCompressedSize: true,
   },
   server: {
+    https: true,
     port: 3000,
     host: true,
     open: true,

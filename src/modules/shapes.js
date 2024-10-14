@@ -677,6 +677,5 @@ export {
   opponentGoal,
   opponentFlag,
   init,
+  Game,
 };
-
-export let talent = Game.talent;

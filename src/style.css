@@ -200,7 +200,7 @@ header #title {
   touch-action: none;
   user-select: none;
   opacity: 0;
-  transition: all 1s ease;
+  transition: all .1s ease;
 }
 
 .showCanvas {
@@ -208,8 +208,8 @@ header #title {
   opacity: 1 !important;
 }
 
-/* .btnFlash {
-  animation: flash .5s ease;
+.btnFlash {
+  animation: flash 3s ease;
 }
 
 @keyframes flash {
@@ -223,12 +223,14 @@ header #title {
 
   15% {
     background: rgba(128, 232, 221, 1);
+    color: #000;
   }
 
   to {
-    background: rgba(128, 232, 221, .25);
+    background: rgba(128, 232, 221, .65);
+    color: #fff;
   }
-} */
+}
 
 .colorCanvas {
   border: 1px solid rgba(128, 232, 221, 1);
@@ -354,6 +356,7 @@ header #title {
 
 #buttons_wrapper label {
   position: relative;
+  transition: all 1s ease;
 }
 
 #buttons_wrapper label:has(input[type=radio]:checked) {

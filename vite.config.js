@@ -1,7 +1,7 @@
-import mkcert from "vite-plugin-mkcert";
+// import mkcert from "vite-plugin-mkcert";
 
 export default {
-  plugins: [mkcert()],
+  // plugins: [mkcert()],
   root: "./src/",
   publicDir: "../public/",
   build: {
@@ -10,7 +10,7 @@ export default {
     reportCompressedSize: true,
   },
   server: {
-    https: true,
+    // https: true,
     port: 3000,
     host: true,
     open: true,

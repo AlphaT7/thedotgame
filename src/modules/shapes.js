@@ -142,6 +142,36 @@ function drawDirectional(centerX, centerY, shiftedX, shiftedY, path) {
   // midX,midY is the point where X is either intercepting 0 or canvas.width;
   // x3,y3 is the point at the end of the 2nd line after distance and angle refraction has been calculated
 
+  let guidAngle = calculateAngle(
+    { x: centerX, y: centerY },
+    { x: shiftedX, y: shiftedY }
+  );
+
+  let startAngle = (guidAngle - 270) * (Math.PI / 180);
+  let endAngle = (guidAngle - 90) * (Math.PI / 180);
+
+  let directionalArc = {
+    x: centerX,
+    y: centerY,
+    r: 75,
+    start: startAngle,
+    end: endAngle,
+  };
+
+  console.log(directionalArc);
+  ctx.save();
+  ctx.beginPath();
+  ctx.lineWidth = 5;
+  ctx.arc(
+    directionalArc.x,
+    directionalArc.y,
+    directionalArc.r,
+    directionalArc.start,
+    directionalArc.end
+  );
+  ctx.stroke();
+  ctx.restore();
+
   let x1 = shiftedX;
   let y1 = shiftedY;
   let x2 = shiftedX + r.x * 3;
@@ -150,10 +180,14 @@ function drawDirectional(centerX, centerY, shiftedX, shiftedY, path) {
   let offScreen = isOffScreen(x2, y2);
 
   if (!offScreen && Game.talent.t1 != "manual") {
+    ctx.save();
+    ctx.setLineDash([4, 16]);
+    ctx.lineDashOffset = 4;
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
     ctx.stroke();
+    ctx.restore();
     Game.directional = { x1: x1, y1: y1, x2: x2, y2: y2 };
     return;
   }
@@ -168,11 +202,16 @@ function drawDirectional(centerX, centerY, shiftedX, shiftedY, path) {
       ctx.beginPath();
       path.forEach((point, i) => {
         if (!(i % 5 == 0)) return;
+        ctx.save();
+        ctx.setLineDash([4, 16]);
+        ctx.lineDashOffset = 4;
         ctx.fillStyle = "#fff";
         ctx.lineTo(point.x, point.y);
         ctx.shadowBlur = 0;
         ctx.stroke();
+        ctx.restore();
       });
+
       break;
 
     case "bounce":
@@ -188,11 +227,15 @@ function drawDirectional(centerX, centerY, shiftedX, shiftedY, path) {
         let x3 = midX + d * Math.cos(angleInRadians);
         let y3 = midY + d * Math.sin(angleInRadians);
 
+        ctx.save();
         ctx.beginPath();
+        ctx.setLineDash([4, 16]);
+        ctx.lineDashOffset = 4;
         ctx.moveTo(x1, y1);
         ctx.lineTo(midX, midY);
         ctx.lineTo(x3, y3);
         ctx.stroke();
+        ctx.restore();
         Game.directional = { x1: x1, y1: y1, x2: midX, y2: midY, x3, y3 };
       })();
       break;
@@ -209,12 +252,17 @@ function drawDirectional(centerX, centerY, shiftedX, shiftedY, path) {
 
         let x4 = x2 < canvas.width ? x2 + canvas.width : x2 - canvas.width;
         let y4 = y2;
+
+        ctx.save();
         ctx.beginPath();
+        ctx.setLineDash([4, 16]);
+        ctx.lineDashOffset = 4;
         ctx.moveTo(x1, y1);
         ctx.lineTo(midX, midY);
         ctx.moveTo(x3, y3);
         ctx.lineTo(x4, y4);
         ctx.stroke();
+        ctx.restore();
         Game.directional = {
           x1: x1,
           y1: y1,

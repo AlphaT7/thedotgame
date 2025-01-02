@@ -147,27 +147,72 @@ function drawDirectional(centerX, centerY, shiftedX, shiftedY, path) {
     { x: shiftedX, y: shiftedY }
   );
 
-  let startAngle = (guidAngle - 270) * (Math.PI / 180);
-  let endAngle = (guidAngle - 90) * (Math.PI / 180);
+  let startAngle1 = (guidAngle - 270) * (Math.PI / 180);
+  let endAngle1 = (guidAngle - 200) * (Math.PI / 180);
+  let startAngle2 = (guidAngle - 160) * (Math.PI / 180);
+  let endAngle2 = (guidAngle - 90) * (Math.PI / 180);
+  let startAngle3 = (guidAngle - 45) * (Math.PI / 180);
+  let endAngle3 = (guidAngle + 45) * (Math.PI / 180);
 
-  let directionalArc = {
+  let directionalArc1 = {
     x: centerX,
     y: centerY,
-    r: 75,
-    start: startAngle,
-    end: endAngle,
+    r: 65,
+    start: startAngle1,
+    end: endAngle1,
   };
 
-  console.log(directionalArc);
+  let directionalArc2 = {
+    x: centerX,
+    y: centerY,
+    r: 65,
+    start: startAngle2,
+    end: endAngle2,
+  };
+
+  let directionalArc3 = {
+    x: centerX,
+    y: centerY,
+    r: 65,
+    start: startAngle3,
+    end: endAngle3,
+  };
+
   ctx.save();
   ctx.beginPath();
-  ctx.lineWidth = 5;
+  ctx.lineWidth = 4;
   ctx.arc(
-    directionalArc.x,
-    directionalArc.y,
-    directionalArc.r,
-    directionalArc.start,
-    directionalArc.end
+    directionalArc1.x,
+    directionalArc1.y,
+    directionalArc1.r,
+    directionalArc1.start,
+    directionalArc1.end
+  );
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.lineWidth = 4;
+  ctx.arc(
+    directionalArc2.x,
+    directionalArc2.y,
+    directionalArc2.r,
+    directionalArc2.start,
+    directionalArc2.end
+  );
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.lineWidth = 4;
+  ctx.arc(
+    directionalArc3.x,
+    directionalArc3.y,
+    directionalArc3.r,
+    directionalArc3.start,
+    directionalArc3.end
   );
   ctx.stroke();
   ctx.restore();
